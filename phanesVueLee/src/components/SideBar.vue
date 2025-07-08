@@ -11,9 +11,9 @@ const toggleSidebar = () => {
 <template>
     <div>
         <transition name="fade">
-        <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
-            + 프로젝트 생성
-        </button>
+            <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
+                + 프로젝트 생성
+            </button>
         </transition>
 
         <button class="hamburger-btn" :class="{ open: isSidebarOpen }" @click="toggleSidebar" aria-label="사이드바 열기/닫기">
@@ -23,12 +23,26 @@ const toggleSidebar = () => {
     </div>
 
     <aside class="sidebar" :class="{ open: isSidebarOpen }">
-        <div class="sidebar-content">
-            <h3>My Projects</h3>
-            <p><em>(파일 탐색기 영역)</em></p>
-            <p>- Phanes-Editor-Project/</p>
-            <p>- Algorithm-Study/</p>
-            <p>- My-Portfolio/</p>
+        <div class="section-container">
+            <h3>내 프로젝트</h3>
+            <div class="scroll-box">
+                <ul>
+                    <li>프로젝트 연습</li>
+                </ul>
+
+
+            </div>
+
+
+        </div>
+
+        <div class="section-container">
+            <h3>참여 프로젝트</h3>
+            <div class="scroll-box">
+                <ul>
+                    <li>알고리즘 함께 연습</li>
+                </ul>
+            </div>
         </div>
     </aside>
 
@@ -82,38 +96,65 @@ const toggleSidebar = () => {
     /* 흰색 배경 */
     border-right: 1px solid #e5e5e5;
     /* 연한 회색 테두리 */
-    padding: 20px;
-    padding-top: 0px;
-    transition: margin-left 0.3s ease-in-out;
-    margin-left: 0;
-    overflow-y: scroll;
-}
-/* 프로젝트 생성 버튼에 대한 css */
-.create-btn {
-  position: fixed;
-  top: 15px;
-  left: 10px; /* 사이드바 너비에 맞춰 위치 지정 */
-  z-index: 1000;
-  background-color: #0056b3;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;
+
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s;
+/* 프로젝트 생성 버튼에 대한 css */
+.create-btn {
+    position: fixed;
+    top: 15px;
+    left: 10px;
+    /* 사이드바 너비에 맞춰 위치 지정 */
+    z-index: 1000;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
 .sidebar:not(.open) {
     margin-left: -280px;
 }
+
+.section-container {
+    flex: 1;
+    /* 두 영역을 균등하게 나눔 */
+    display: flex;
+    /* 내부를 세로 배치 */
+    flex-direction: column;
+    /* 제목 위, 리스트 아래로 정렬 */
+    min-height: 0;
+}
+
+.scroll-box {
+    flex: 1;
+    /* 남은 공간을 모두 차지 */
+    overflow-y: auto;
+    /* 내부 항목이 넘치면 스크롤 표시 */
+    padding-right: 5px;
+    /* 우측 여백 (스크롤바 안 가리게) */
+}
+
+
 
 .sidebar-content h3 {
     color: #0056b3;
