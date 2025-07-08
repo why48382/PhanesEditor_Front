@@ -45,6 +45,9 @@ body {
 }
 
 .navbar {
+    position: absolute;
+    top:0;
+    right:0;
     display: flex;
     justify-content: flex-end;
     align-items: center;
