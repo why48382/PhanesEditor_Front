@@ -35,9 +35,9 @@
 <br>
 
 ## 화면 설계
-https://www.figma.com/design/dCuNxFPMdvl2PBqwGImztS/main-%EC%82%AC%EC%9D%B4%ED%8A%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EC%B4%88%EC%95%88?node-id=0-1&t=UUGtQT8BFGOE1fMl-1
+[Figma 주소](https://www.figma.com/design/dCuNxFPMdvl2PBqwGImztS/main-%EC%82%AC%EC%9D%B4%ED%8A%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EC%B4%88%EC%95%88?node-id=0-1&t=UUGtQT8BFGOE1fMl-1)
 ## 도메인 주소
-jujujusik.kro.kr
+[www.jujujusik.kro.kr](https://www.jujujusik.kro.kr)
 ## 프로젝트 시연
 
 ## 기술 스택
