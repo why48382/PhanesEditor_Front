@@ -6,62 +6,86 @@ const isSidebarOpen = ref(false);
 const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
 };
+
 </script>
 
 <template>
-    <div>
-        <transition name="fade">
-            <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
-                + 프로젝트 생성
-            </button>
-        </transition>
-
-        <button class="hamburger-btn" :class="{ open: isSidebarOpen }" @click="toggleSidebar" aria-label="사이드바 열기/닫기">
-            ☰
-        </button>
-
-    </div>
+    <button class="hamburger-btn" :class="{ open: isSidebarOpen }" @click="toggleSidebar" aria-label="사이드바 열기/닫기">
+        ☰
+    </button>
 
     <aside class="sidebar" :class="{ open: isSidebarOpen }">
-        <div class="section-container">
-            <h3>내 프로젝트</h3>
-            <div class="scroll-box">
-                <ul>
-                    <li>프로젝트 연습</li>
-                </ul>
+        <div class="sidebar-top">
+            <transition name="fade">
+                <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
+                    + 프로젝트 생성
+                </button>
+            </transition>
+        </div>
+
+        <div class="sidebar-list-section">
+            <div class="section-container">
+                <h3>내 프로젝트</h3>
+                <div class="scroll-box">
+                    <ul>
+                        <li>프로젝트 연습</li>
+                    </ul>
+
+
+                </div>
 
 
             </div>
 
-
-        </div>
-
-        <div class="section-container">
-            <h3>참여 프로젝트</h3>
-            <div class="scroll-box">
-                <ul>
-                    <li>알고리즘 함께 연습</li>
-                </ul>
+            <div class="section-container">
+                <h3>참여 프로젝트</h3>
+                <div class="scroll-box">
+                    <ul>
+                        <li>알고리즘 함께 연습</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </aside>
+
 
 </template>
 
 <style scoped>
 /* ★★★★★ 여기가 핵심: 전체 테마 및 버튼 위치 수정 ★★★★★ */
-.page-container {
-    display: flex;
-    flex-direction: row;
+.sidebar {
     height: 100vh;
-    width: 100vw;
-    background-color: #f8f5f2;
-    /* 부드러운 베이지/오프화이트 배경 */
-    color: #333333;
-    /* 기본 글자색을 어둡게 */
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    /* 가독성 좋은 기본 폰트 */
+    width: 280px;
+    flex-shrink: 0;
+    background-color: #ffffff;
+    /* 흰색 배경 */
+    border-right: 1px solid #e5e5e5;
+    /* 연한 회색 테두리 */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     overflow: hidden;
+
+}
+
+.sidebar-top {
+    /* 버튼 전용 상단 영역 */
+    padding-bottom:16px;
+    border-bottom: 1px solid #eee;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+}
+
+.sidebar-list-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 16px;
 }
 
 /* 햄버거 버튼 */
@@ -88,21 +112,7 @@ const toggleSidebar = () => {
 }
 
 /* 사이드바 스타일 */
-.sidebar {
-    height: 100vh;
-    width: 15%;
-    flex-shrink: 0;
-    background-color: #ffffff;
-    /* 흰색 배경 */
-    border-right: 1px solid #e5e5e5;
-    /* 연한 회색 테두리 */
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow: hidden;
 
-}
 
 /* 프로젝트 생성 버튼에 대한 css */
 .create-btn {
