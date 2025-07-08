@@ -1,5 +1,5 @@
 <template>
-    <div ref="editorContainer" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>
+    <div class="editor" ref="editorContainer"></div>
   </template>
   
   <script setup lang="ts">
@@ -19,7 +19,7 @@
         value: `function hello() {\n\talert('Hello, Vue + Monaco Editor!');\n}`,
         language: 'javascript',
         theme: 'vs-dark', // 테마: 'vs-dark', 'vs-light' 등
-        automaticLayout: true, // 컨테이너 크기 변경 시 에디터 크기 자동 조절
+        // automaticLayout: true, // 컨테이너 크기 변경 시 에디터 크기 자동 조절
       });
     }
   });
@@ -31,3 +31,10 @@
     }
   });
   </script>
+<style>
+  .editor {
+    min-width: 42rem;
+    height: 35rem; 
+    border: 1px solid #ccc;
+  }
+</style>
