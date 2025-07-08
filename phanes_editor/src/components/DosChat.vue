@@ -1,3 +1,6 @@
+<script setup>
+  
+</script>
 <template>
   <div class="chat-container" @click="focusInput">
     <div class="message-window" ref="messageWindowRef">
@@ -110,10 +113,11 @@ onMounted(() => {
   font-family: 'Courier New', Courier, monospace;
   border: 2px solid #555;
   padding: 10px;
-  height: auto;
+  max-height: 95%;
+  min-width: 20rem;
+  position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .message-window {

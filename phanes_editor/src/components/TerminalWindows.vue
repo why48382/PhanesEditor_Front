@@ -68,10 +68,13 @@
   
   <style scoped>
   .terminal-container {
-    min-height: 282px;
-    width: 100%;
-    height: 45%;
-    padding: 10px;
+    width: 75rem;
+    height: 180px;
+    margin-top: 1px;
+    margin-left: 3px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 25px;
     background-color: #1e1e1e;
   }
   </style>
