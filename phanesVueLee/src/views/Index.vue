@@ -1,14 +1,25 @@
 <script setup>
-
+import { ref } from 'vue'
+import sidebar from '@/components/SideBar.vue'
+const isLogin = ref(false);
 </script>
 
 
 <template>
-    <nav class="navbar">
-        <a href="#">Phanes</a>
-        <a href="#">이미지</a>
-        <button class="login-btn">로그인</button>
-    </nav>
+    <div v v-if="isLogin">
+        <nav class="navbar">
+            <button class="login-btn">로그인</button>
+            <button class="login-btn">회원가입</button>
+        </nav>
+    </div>
+    <div v v-else>
+        <nav class="navbar">
+            <button class="login-btn">mypage</button>
+            <button class="login-btn">로그아웃</button>
+        </nav>
+        <sidebar></sidebar>
+
+    </div>
 
     <div class="main-container">
         <div class="main-title">Phanes</div>
@@ -38,7 +49,7 @@ body {
     justify-content: flex-end;
     align-items: center;
     padding: 16px 32px;
-    gap: 24px;
+    gap: 10px;
     font-size: 14px;
     font-weight: 500;
 }
@@ -59,6 +70,7 @@ body {
     border-radius: 9999px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
+    font-size: 12px;
 }
 
 .login-btn:hover {
