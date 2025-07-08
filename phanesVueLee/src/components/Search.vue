@@ -128,6 +128,7 @@ const toggleSidebar = () => {
 
 /* 메인 콘텐츠 영역 */
 .main-content {
+  margin-left : 35px;
   flex-grow: 1;
   padding: 20px;
   display: flex;
