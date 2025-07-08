@@ -90,7 +90,7 @@ const toggleSidebar = () => {
 /* 사이드바 스타일 */
 .sidebar {
     height: 100vh;
-    width: 260px;
+    width: 15%;
     flex-shrink: 0;
     background-color: #ffffff;
     /* 흰색 배경 */
