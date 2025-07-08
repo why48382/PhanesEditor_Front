@@ -5,7 +5,8 @@ const router = createRouter({
   routes: [
     { path: "/editor", component: () => import("../views/EdirotFrame.vue") },
     { path: "/", component: () => import("../views/Index.vue") },
-    { path: "/profile", component: () => import("../views/Profile.vue") }
+    { path: "/profile", component: () => import("../views/Profile.vue") },
+    { path: "/create/project", component: () => import("../views/CreateProject.vue") }
 
   ],
 })
