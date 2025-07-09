@@ -31,7 +31,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div ref="editorContainer" style="width:80%; height:60%;"></div>
+    <div ref="editorContainer" style="width:80%; height:80%;"></div>
 </template>
 
 <style scoped></style>
