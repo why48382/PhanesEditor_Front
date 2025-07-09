@@ -40,5 +40,6 @@ import TerminalWindows from "@/components/TerminalWindows.vue";
 .editor_chat {
   display: flex;
   height: 80%;
+  margin: 10px;
 }
 </style>
