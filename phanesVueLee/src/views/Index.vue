@@ -1,7 +1,17 @@
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
+import api from '@/api/mypage'
 const isLogin = ref(false);
+
+const pageOpen = async() => {
+
+    const data = await api.userMypage();
+    if(data & data.success) {
+        router.push("/profile")
+    } 
+
+}
 </script>
 
 
@@ -15,7 +25,7 @@ const isLogin = ref(false);
     <div v v-else>
         <nav class="navbar">
             <router-link to="/profile">
-                <button class="login-btn">mypage</button>
+                <button @click="pageOpen" class="login-btn">mypage</button>
             </router-link>
             <button class="login-btn">로그아웃</button>
         </nav>
