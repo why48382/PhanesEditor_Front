@@ -8,7 +8,7 @@ const router = createRouter({
     { path: "/profile", component: () => import("../views/Profile.vue") },
     { path: "/create/project", component: () => import("../views/CreateProject.vue") },
     { path: "/search", component: () => import("@/components/Search.vue") },
-
+    { path: "/login", component: () => import("@/views/Login.vue") },
     { path: "/test", component: () => import("../views/ProfileUpdate.vue") },
   ],
 })
