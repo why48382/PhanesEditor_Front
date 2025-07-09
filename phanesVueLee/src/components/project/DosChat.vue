@@ -110,9 +110,13 @@ onMounted(() => {
   flex-direction: column;
   overflow-y: scroll;
 <<<<<<< HEAD:phanesVueLee/src/components/project/DosChat.vue
+<<<<<<< HEAD:phanesVueLee/src/components/project/DosChat.vue
   margin-left: 10px;
 =======
 >>>>>>> 0ee3b7d ([Style] ProjectPage.vue의 배치 디테일한 css 수정):phanesVueLee/src/components/DosChat.vue
+=======
+  margin-left: 10px;
+>>>>>>> 8c151ec (css 수정):phanesVueLee/src/components/DosChat.vue
 }
 
 .message-window {
