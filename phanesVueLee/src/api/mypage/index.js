@@ -4,7 +4,7 @@ import api from "@/plugins/axiosinterceptor"
 
 const userMypage = async () => {
     let data = {};
-    let url = 'api/usr/mypage'
+    let url = 'api/v1/user/usr_mypage.json'
 
     await api.get(url)
     .then((res)=>{

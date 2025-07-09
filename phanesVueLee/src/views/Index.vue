@@ -3,34 +3,52 @@
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
-const isLogin = ref(true);
+import api from '@/api/mypage'
+import { useRouter } from 'vue-router'
+const isLogin = ref(false);
+const router = useRouter()
+
+
+const openMypage = async () => {
+    const data = await api.userMypage();
+    if (data && data.success) {
+        router.push({ name: 'profile' })
+        alert("응답 성공")
+    } else {
+        alert("응답 실패")
+    }
+
+
+}
 </script>
 
 
 <template>
-    <div v v-if="isLogin">
-        <nav class="navbar">
-            <router-link :to="{name: 'login' }"><button class="login-btn">로그인</button></router-link>
-            <button class="login-btn">회원가입</button>
-        </nav>
-    </div>
-    <div v v-else>
-        <nav class="navbar">
-            <router-link :to="{name: 'profile' }">
-                <button class="login-btn">mypage</button>
-            </router-link>
-            <button class="login-btn">로그아웃</button>
-        </nav>
-        <sidebar></sidebar>
+    <div>
+        <div v v-if="isLogin">
+            <nav class="navbar">
+                <router-link :to="{ name: 'login' }"><button class="login-btn">로그인</button></router-link>
+                <button class="login-btn">회원가입</button>
+            </nav>
+        </div>
+        <div v v-else>
+            <nav class="navbar">
+                <button @click="openMypage" class="login-btn">mypage</button>
+                <button @click="l" class="login-btn">로그아웃</button>
+            </nav>
+            <sidebar></sidebar>
 
-    </div>
+        </div>
 
-    <div class="main-container">
-        <div class="main-title">Phanes</div>
-        <input type="text" class="url-input" placeholder="URL을 입력하세요">
+        <div class="main-container">
+            <div class="main-title">Phanes</div>
+            <input type="text" class="url-input" placeholder="URL을 입력하세요">
+        </div>
     </div>
 
 </template>
+
+
 
 
 <style scoped>
