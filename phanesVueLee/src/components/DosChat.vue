@@ -109,6 +109,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+  margin-left: 10px;
 }
 
 .message-window {
