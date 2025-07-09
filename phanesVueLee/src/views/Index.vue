@@ -1,31 +1,23 @@
+<!-- isLogin 값을 false 할 경우 로그인 된 상태 -->
+
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
-import api from '@/api/mypage'
 const isLogin = ref(false);
-
-const pageOpen = async() => {
-
-    const data = await api.userMypage();
-    if(data & data.success) {
-        router.push("/profile")
-    } 
-
-}
 </script>
 
 
 <template>
     <div v v-if="isLogin">
         <nav class="navbar">
-            <router-link to="/login"><button class="login-btn">로그인</button></router-link>
+            <router-link :to="{name: 'login' }"><button class="login-btn">로그인</button></router-link>
             <button class="login-btn">회원가입</button>
         </nav>
     </div>
     <div v v-else>
         <nav class="navbar">
             <router-link to="/profile">
-                <button @click="pageOpen" class="login-btn">mypage</button>
+                <button class="login-btn">mypage</button>
             </router-link>
             <button class="login-btn">로그아웃</button>
         </nav>

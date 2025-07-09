@@ -1,9 +1,9 @@
 <script setup>
 import SideBar from "@/components/SideBar.vue";
-import Editor from "@/components/Editor.vue";
-import EdirotFrame from "@/components/EdirotFrame.vue";
-import DosChat from "@/components/DosChat.vue";
-import TerminalWindows from "@/components/TerminalWindows.vue";
+import Editor from "@/components/project/Editor.vue";
+import EdirotFrame from "@/components/project/EdirotFrame.vue";
+import DosChat from "@/components/project/DosChat.vue";
+import TerminalWindows from "@/components/project/TerminalWindows.vue";
 </script>
 
 <template>
@@ -37,6 +37,7 @@ import TerminalWindows from "@/components/TerminalWindows.vue";
   width: 100%;
   height: 100%;
 }
+
 .editor_chat {
   display: flex;
   height: 80%;
