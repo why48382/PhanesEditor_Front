@@ -1,9 +1,11 @@
 <script setup>
 import Editor from "../components/Editor.vue"
+import SideBar from "@/components/SideBar.vue";
 </script>
 
 
 <template>
+    <SideBar />
     <nav class="navbar">
         <div class="navbar-left">
             <div class="logo">img</div>
