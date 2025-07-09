@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
-const isLogin = ref(true);
+const isLogin = ref(false);
 </script>
 
 
@@ -14,7 +14,9 @@ const isLogin = ref(true);
     </div>
     <div v v-else>
         <nav class="navbar">
-            <button class="login-btn">mypage</button>
+            <router-link to="/profile">
+                <button class="login-btn">mypage</button>
+            </router-link>
             <button class="login-btn">로그아웃</button>
         </nav>
         <sidebar></sidebar>
@@ -46,8 +48,8 @@ body {
 
 .navbar {
     position: absolute;
-    top:0;
-    right:0;
+    top: 0;
+    right: 0;
     display: flex;
     justify-content: flex-end;
     align-items: center;
