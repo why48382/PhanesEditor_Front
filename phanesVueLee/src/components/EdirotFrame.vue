@@ -1,33 +1,11 @@
 <script setup>
-import Editor from "../components/Editor.vue"
-import SideBar from "@/components/SideBar.vue";
 </script>
 
 
 <template>
-    <SideBar />
     <nav class="navbar">
         <div class="navbar-left">
-            <div class="logo">img</div>
-
-            <div class="dropdown">
-                <span class="menu-item dropdown-arrow">File</span>
-                <div class="dropdown-content">
-                    <a href="file:///C:/Users/why48_/Desktop/nav.html#">New File</a>
-                    <a href="file:///C:/Users/why48_/Desktop/nav.html#">Open File...</a>
-                    <a href="file:///C:/Users/why48_/Desktop/nav.html#">Save</a>
-                    <a href="file:///C:/Users/why48_/Desktop/nav.html#">Save As...</a>
-                </div>
-            </div>
-
-            <div class="dropdown">
-                <span class="menu-item dropdown-arrow">Help</span>
-                <div class="dropdown-content">
-                    <a href="file:///C:/Users/why48_/Desktop/nav.html#">Documentation</a>
-                    <a href="file:///C:/Users/why48_/Desktop/nav.html#">GitHub Repository</a>
-                    <a href="file:///C:/Users/why48_/Desktop/nav.html#">Report Issue</a>
-                </div>
-            </div>
+            <!-- 비어있지만 필요한 부분임 -->
         </div>
 
         <div class="navbar-right">
@@ -42,7 +20,6 @@ import SideBar from "@/components/SideBar.vue";
             <a href="#" class="sign-in-btn">Sign in</a>
         </div>
     </nav>
-    <Editor />
 </template>
 
 

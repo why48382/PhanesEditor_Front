@@ -71,7 +71,6 @@ const toggleSidebar = () => {
 
 .sidebar-top {
     /* 버튼 전용 상단 영역 */
-    padding-bottom:16px;
     border-bottom: 1px solid #eee;
     min-height: 40px;
     display: flex;
@@ -91,7 +90,7 @@ const toggleSidebar = () => {
 /* 햄버거 버튼 */
 .hamburger-btn {
     position: fixed;
-    top: 15px;
+    top: 5px;
     left: 15px;
     /* 기본 위치 */
     z-index: 1001;
@@ -117,7 +116,7 @@ const toggleSidebar = () => {
 /* 프로젝트 생성 버튼에 대한 css */
 .create-btn {
     position: fixed;
-    top: 15px;
+    top: 5px;
     left: 10px;
     /* 사이드바 너비에 맞춰 위치 지정 */
     z-index: 1000;
