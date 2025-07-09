@@ -1,3 +1,34 @@
+<script setup>
+
+</script>
+<template>
+  <div class="chat-container" @click="focusInput">
+    <div class="message-window" ref="messageWindowRef">
+      <div class="header">
+        === Phanes Editor Command-Line Chat ===
+      </div>
+      <ul>
+        <li v-for="msg in messages" :key="msg.id" class="message-line">
+          <span class="timestamp">[{{ msg.time }}]</span>
+          <span class="message-user" :style="{ color: getUserColor(msg.user) }">&lt;{{ msg.user }}&gt;</span>
+          <span class="message-text">{{ msg.text }}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="input-area">
+      <span class="prompt">&gt;</span>
+      <input
+        type="text"
+        v-model="newMessage"
+        @keydown.enter="sendMessage"
+        class="chat-input"
+        ref="inputRef"
+        autocomplete="off"
+      />
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 
@@ -104,6 +135,9 @@ onMounted(() => {
   /* 밝은 녹색 */
   font-family: 'Courier New', Courier, monospace;
   height: 100%;
+  border: 2px solid #555;
+  padding: 10px;
+  max-height: 95%;
   min-width: 20rem;
   position: relative;
   display: flex;
