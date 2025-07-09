@@ -79,6 +79,7 @@ const toggleSidebar = () => {
 </script>
 
 <style scoped>
+
 /* ★★★★★ 여기가 핵심: 전체 테마 및 버튼 위치 수정 ★★★★★ */
 .page-container {
   display: flex;
@@ -107,12 +108,12 @@ const toggleSidebar = () => {
 
 /* 사이드바가 열렸을 때 햄버거 버튼의 위치 */
 .hamburger-btn.open {
-  left: 295px; /* 사이드바 너비(280px) + 여백(15px) */
+  left: 265px; /* 사이드바 너비(280px) + 여백(15px) */
 }
 
 /* 사이드바 스타일 */
 .sidebar {
-  width: 280px;
+  width: 260px;
   flex-shrink: 0;
   background-color: #ffffff; /* 흰색 배경 */
   border-right: 1px solid #e5e5e5; /* 연한 회색 테두리 */
@@ -120,6 +121,7 @@ const toggleSidebar = () => {
   padding-top: 60px;
   transition: margin-left 0.3s ease-in-out;
   margin-left: 0;
+  overflow-y: scroll;
 }
 
 .sidebar:not(.open) {
@@ -138,7 +140,7 @@ const toggleSidebar = () => {
 
 /* 메인 콘텐츠 영역 */
 .main-content {
-  flex-grow: 1;
+  flex-grow: 0.99;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -177,7 +179,7 @@ const toggleSidebar = () => {
 /* 검색 결과 영역 */
 .results-section {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;

@@ -1,34 +1,3 @@
-<script setup>
-  
-</script>
-<template>
-  <div class="chat-container" @click="focusInput">
-    <div class="message-window" ref="messageWindowRef">
-      <div class="header">
-        === Phanes Editor Command-Line Chat ===
-      </div>
-      <ul>
-        <li v-for="msg in messages" :key="msg.id" class="message-line">
-          <span class="timestamp">[{{ msg.time }}]</span>
-          <span class="message-user" :style="{ color: getUserColor(msg.user) }">&lt;{{ msg.user }}&gt;</span>
-          <span class="message-text">{{ msg.text }}</span>
-        </li>
-      </ul>
-    </div>
-    <div class="input-area">
-      <span class="prompt">&gt;</span>
-      <input
-        type="text"
-        v-model="newMessage"
-        @keydown.enter="sendMessage"
-        class="chat-input"
-        ref="inputRef"
-        autocomplete="off"
-      />
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 
@@ -43,6 +12,7 @@ const messages = ref([
   { id: 2, user: 'guest123', text: '안녕하세요! 이 부분 어떻게 해결해야 할까요?', time: '09:28:15' },
   { id: 3, user: 'jamjari1', text: '아, 그 문제는 제가 한번 볼게요.', time: '09:28:22' },
   { id: 4, user: 'master_dev', text: '잠시만요, 제가 수정해봤습니다.', time: '09:28:40' },
+  { id: 5, user: 'master_dev', text: '...', time: '09:28:40' }
 ]);
 
 // 새 메시지 입력을 위한 ref
@@ -102,14 +72,36 @@ function focusInput() {
 onMounted(() => {
   focusInput();
 });
-
 </script>
+
+<template>
+  <div class="chat-container" @click="focusInput">
+    <div class="message-window" ref="messageWindowRef">
+      <div class="header">
+        === Phanes Editor Command-Line Chat ===
+      </div>
+      <ul>
+        <li v-for="msg in messages" :key="msg.id" class="message-line">
+          <span class="timestamp">[{{ msg.time }}]</span>
+          <span class="message-user" :style="{ color: getUserColor(msg.user) }">&lt;{{ msg.user }}&gt;</span>
+          <span class="message-text">{{ msg.text }}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="input-area">
+      <span class="prompt">&gt;</span>
+      <input type="text" v-model="newMessage" @keydown.enter="sendMessage" class="chat-input" ref="inputRef"
+        autocomplete="off" />
+    </div>
+  </div>
+</template>
 
 <style scoped>
 /* DOS 화면 느낌을 위한 스타일링 */
 .chat-container {
   background-color: #000000;
-  color: #00FF00; /* 밝은 녹색 */
+  color: #00FF00;
+  /* 밝은 녹색 */
   font-family: 'Courier New', Courier, monospace;
   border: 2px solid #555;
   padding: 10px;
@@ -127,7 +119,8 @@ onMounted(() => {
 }
 
 .header {
-  color: #FFFF00; /* 노란색 */
+  color: #FFFF00;
+  /* 노란색 */
   text-align: center;
   margin-bottom: 10px;
   padding-bottom: 5px;
@@ -142,7 +135,8 @@ onMounted(() => {
 
 .message-line {
   margin-bottom: 5px;
-  word-wrap: break-word; /* 긴 단어 줄바꿈 */
+  word-wrap: break-word;
+  /* 긴 단어 줄바꿈 */
 }
 
 .timestamp {
@@ -156,7 +150,8 @@ onMounted(() => {
 
 .message-text {
   margin-left: 5px;
-  white-space: pre-wrap; /* 텍스트 내 공백과 줄바꿈 유지 */
+  white-space: pre-wrap;
+  /* 텍스트 내 공백과 줄바꿈 유지 */
 }
 
 .input-area {
@@ -168,7 +163,7 @@ onMounted(() => {
 
 .prompt {
   margin-right: 5px;
-  animation: blink 1s step-end infinite;
+  /* animation: blink 1s step-end infinite; */
 }
 
 .chat-input {
@@ -178,7 +173,8 @@ onMounted(() => {
   font-family: inherit;
   font-size: 1em;
   width: 100%;
-  outline: none; /* 포커스 시 테두리 제거 */
+  outline: none;
+  /* 포커스 시 테두리 제거 */
 }
 
 /* 깜빡이는 커서 효과 */

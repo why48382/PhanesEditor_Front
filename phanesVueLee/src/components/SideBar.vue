@@ -55,7 +55,7 @@ const toggleSidebar = () => {
 /* ★★★★★ 여기가 핵심: 전체 테마 및 버튼 위치 수정 ★★★★★ */
 .sidebar {
     height: 100vh;
-    width: 280px;
+    width: 265px;
     flex-shrink: 0;
     background-color: #ffffff;
     /* 흰색 배경 */
@@ -107,7 +107,7 @@ const toggleSidebar = () => {
 
 /* 사이드바가 열렸을 때 햄버거 버튼의 위치 */
 .hamburger-btn.open {
-    left: 265px;
+    left: 255px;
     /* 사이드바 너비(280px) + 여백(15px) */
 }
 
@@ -121,7 +121,7 @@ const toggleSidebar = () => {
     left: 10px;
     /* 사이드바 너비에 맞춰 위치 지정 */
     z-index: 1000;
-    background-color: #0056b3;
+    background-color: #2b73be;
     color: white;
     border: none;
     border-radius: 6px;
