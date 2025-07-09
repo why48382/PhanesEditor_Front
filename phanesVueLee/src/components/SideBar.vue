@@ -17,12 +17,12 @@ const toggleSidebar = () => {
     <aside class="sidebar" :class="{ open: isSidebarOpen }">
         <div class="sidebar-top">
             <transition name="fade">
-                    <router-link to="/create/project">
+                <router-link to="/create/project">
                     <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
                         + 프로젝트 생성
                     </button>
                 </router-link>
-                </transition>
+            </transition>
         </div>
 
         <div class="sidebar-list-section">
@@ -30,7 +30,11 @@ const toggleSidebar = () => {
                 <h3>내 프로젝트</h3>
                 <div class="scroll-box">
                     <ul>
-                        <li>프로젝트 연습</li>
+                        <router-link to="/editor">
+                            <li class="list">프로젝트 연습</li>
+                            <li class="list">코딩테스트 연습</li>
+                        </router-link>
+
                     </ul>
 
 
@@ -43,7 +47,9 @@ const toggleSidebar = () => {
                 <h3>참여 프로젝트</h3>
                 <div class="scroll-box">
                     <ul>
-                        <li>알고리즘 함께 연습</li>
+                        <router-link to="/editor">
+                            <li class="list">알고리즘 함께 연습</li>
+                        </router-link>
                     </ul>
                 </div>
             </div>
@@ -87,6 +93,17 @@ const toggleSidebar = () => {
     flex-direction: column;
     gap: 20px;
     padding-top: 16px;
+}
+
+.list {
+    margin-bottom: 10px;
+    cursor: pointer;
+
+}
+
+.list:hover {
+    text-decoration: underline;
+     /* 마우스를 올렸을 때 밑줄 표시 */
 }
 
 /* 햄버거 버튼 */
@@ -154,6 +171,8 @@ const toggleSidebar = () => {
     flex-direction: column;
     /* 제목 위, 리스트 아래로 정렬 */
     min-height: 0;
+    /* 밑바닥 여백 */
+
 }
 
 .scroll-box {
@@ -171,7 +190,7 @@ const toggleSidebar = () => {
     color: #0056b3;
     /* 포인트 컬러 (파란색 계열) */
     border-bottom: 1px solid #e5e5e5;
-    padding-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .sidebar-content p {
