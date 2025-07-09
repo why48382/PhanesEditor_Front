@@ -1,19 +1,14 @@
 <script setup>
-import useUserStore from '@/stores/useUserStore';
-
-const userForm = useUserStore();
-console.log(userForm.userObj.email)
-
 const nickname = localStorage.getItem("nickname");
 console.log(nickname);
+
+let inputValue = "이름"
 
 </script>
 
 <template>
     <div class="top-bar">
-        <router-link to="/">
-            <h1>Phanes 계정</h1>
-        </router-link>
+        <h1>Phanes 계정</h1>
         <div class="profile-icon">
             <img src="https://lh3.googleusercontent.com/a/ACg8ocIYJXGITMJfJ8BKyRNsFD3n3RPixBPQSWutwuhHxb44cBr74cFC=s288-c-no"
                 class="profile-img" alt="임시 이미지">
@@ -42,6 +37,7 @@ console.log(nickname);
             <div class="info-item">
                 <div class="info-label">이름</div>
                 <div class="info-detail">
+                    <input type="text" :value="inputValue" />
                     <div class="info-value">{{ nickname }}</div>
                 </div>
             </div>
