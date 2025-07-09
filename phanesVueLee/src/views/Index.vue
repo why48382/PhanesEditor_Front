@@ -1,14 +1,14 @@
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
-const isLogin = ref(false);
+const isLogin = ref(true);
 </script>
 
 
 <template>
     <div v v-if="isLogin">
         <nav class="navbar">
-            <button class="login-btn">로그인</button>
+            <router-link to="/login"><button class="login-btn">로그인</button></router-link>
             <button class="login-btn">회원가입</button>
         </nav>
     </div>
