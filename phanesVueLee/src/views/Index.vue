@@ -1,20 +1,20 @@
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
-const isLogin = ref(false);
+const isLogin = ref(true);
 </script>
 
 
 <template>
     <div v v-if="isLogin">
         <nav class="navbar">
-            <router-link to="/login"><button class="login-btn">로그인</button></router-link>
+            <router-link :to="{name: 'login' }"><button class="login-btn">로그인</button></router-link>
             <button class="login-btn">회원가입</button>
         </nav>
     </div>
     <div v v-else>
         <nav class="navbar">
-            <router-link to="/profile">
+            <router-link :to="{name: 'profile' }">
                 <button class="login-btn">mypage</button>
             </router-link>
             <button class="login-btn">로그아웃</button>
