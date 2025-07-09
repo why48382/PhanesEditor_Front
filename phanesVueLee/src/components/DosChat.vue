@@ -108,7 +108,7 @@ onMounted(() => {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 5px 5px 0 5px;
+  overflow-y: scroll;
 }
 
 .message-window {
@@ -122,13 +122,13 @@ onMounted(() => {
   /* 노란색 */
   text-align: center;
   margin-bottom: 10px;
-  padding-bottom: 5px;
+  padding: 10px;
   border-bottom: 1px dashed #555;
 }
 
 .message-window ul {
   list-style-type: none;
-  padding: 0;
+  padding: 5px;
   margin: 0;
 }
 

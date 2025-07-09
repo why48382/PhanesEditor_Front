@@ -24,14 +24,14 @@ onMounted(() => {
     monaco.editor.create(editorContainer.value, {
         value: 'console.log("Hello World")\n',
         language: 'javascript',
-        theme: 'vs-light',
+        theme: 'vs-dark',
         automaticLayout: true
     });
 });
 </script>
 
 <template>
-    <div ref="editorContainer" style="width:80%; height:80%;"></div>
+    <div ref="editorContainer" style="width:80%; height:100%;"></div>
 </template>
 
 <style scoped></style>
