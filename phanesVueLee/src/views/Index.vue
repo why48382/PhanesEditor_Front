@@ -1,3 +1,5 @@
+<!-- isLogin 값을 false 할 경우 로그인 된 상태 -->
+
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
