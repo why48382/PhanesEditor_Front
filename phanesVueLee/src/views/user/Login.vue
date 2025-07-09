@@ -42,9 +42,6 @@
   // Firebase 인증 인스턴스 가져오기
   const auth = getAuth();
 
-const userStore = useUserStore();
-const loginform = userStore.userObj
-
   // 'select_provider' (소셜 로그인 선택) 또는 'set_nickname' (닉네임 설정)
   const step = ref('select_provider'); 
   
