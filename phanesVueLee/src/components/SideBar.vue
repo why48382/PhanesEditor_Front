@@ -17,10 +17,12 @@ const toggleSidebar = () => {
     <aside class="sidebar" :class="{ open: isSidebarOpen }">
         <div class="sidebar-top">
             <transition name="fade">
-                <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
-                    + 프로젝트 생성
-                </button>
-            </transition>
+                    <router-link to="/create/project">
+                    <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
+                        + 프로젝트 생성
+                    </button>
+                </router-link>
+                </transition>
         </div>
 
         <div class="sidebar-list-section">
