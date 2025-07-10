@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const userSignUp = async (req) => {
     let data = {};
-    let url = '/api/v1/project';
+    let url = '/api/v1/usr';
 
     await api.post(url, req)
         .then((res) => {
@@ -12,6 +12,37 @@ const userSignUp = async (req) => {
             data = error.data;
         });
 
+    return data;
+}
+
+const logOut = async () => {
+    let data = {};
+    let url = '/api/v1/user/usr_logout.json';
+
+    await api.get(url)
+        .then((res) => {
+            data = res.data;
+        })
+        .catch((error) => {
+            data = error.data;
+        });
+
+    return data;
+}
+
+// 벡엔드 호출 후 받은 데이터를 반환
+
+const userMypage = async () => {
+    let data = {};
+    let url = 'api/v1/user/usr_mypage.json'
+
+    await api.get(url)
+    .then((res)=>{
+        data = res.data;
+    })
+    .catch((error) => {
+        data = error.data;
+    })
     return data;
 }
 
@@ -62,4 +93,4 @@ const updateUser = async (userId, updateData) => {
 }
 
 
-export default { userSignUp, fetchUserById, updateUser }
+export default { userSignUp, fetchUserById, updateUser, userMypage, logOut }
