@@ -3,7 +3,7 @@
 <script setup>
 import { ref } from 'vue'
 import sidebar from '@/components/SideBar.vue'
-import api from '@/api/mypage'
+import api from '@/api/user/user_index'
 import { useRouter } from 'vue-router'
 const isLogin = ref(false);
 const router = useRouter()
@@ -20,6 +20,17 @@ const openMypage = async () => {
 
 
 }
+
+const logOut = async () => {
+    const data = await api.logOut();
+        if (data && data.success) {
+        isLogin.value = true;
+        router.push({ name: 'main' })
+        alert("응답 성공")
+    } else {
+        alert("응답 실패")
+    }
+}
 </script>
 
 
@@ -34,7 +45,7 @@ const openMypage = async () => {
         <div v v-else>
             <nav class="navbar">
                 <button @click="openMypage" class="login-btn">mypage</button>
-                <button @click="l" class="login-btn">로그아웃</button>
+                <button @click="logOut" class="login-btn">로그아웃</button>
             </nav>
             <sidebar></sidebar>
 
