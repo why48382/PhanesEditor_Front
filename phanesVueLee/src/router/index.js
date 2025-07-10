@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: "/", component: () => import("@/views/Index.vue") },
+    { path: "/", name: 'main', component: () => import("@/views/Index.vue") },
     { path: "/user/login", name: 'login', component: () => import("@/views/user/Login.vue") },
     // { path: "/user/signup", name: 'search', component: () => import("@/views/user/Signup.vue") },    
     { path: "/user/profile", name: 'profile', component: () => import("@/views/user/Profile.vue") },

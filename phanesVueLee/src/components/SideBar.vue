@@ -7,54 +7,55 @@ const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
 };
 
+
 </script>
 
 <template>
-    <button class="hamburger-btn" :class="{ open: isSidebarOpen }" @click="toggleSidebar" aria-label="사이드바 열기/닫기">
-        ☰
-    </button>
+    <div>
+        <button class="hamburger-btn" :class="{ open: isSidebarOpen }" @click="toggleSidebar" aria-label="사이드바 열기/닫기">
+            ☰
+        </button>
 
-    <aside class="sidebar" :class="{ open: isSidebarOpen }">
-        <div class="sidebar-top">
-            <transition name="fade">
-                <router-link :to="{ name: 'projectCreate' }">
-                    <button v-if="isSidebarOpen" class="create-btn" @click="createProject" aria-label="프로젝트 생성">
-                        + 프로젝트 생성
-                    </button>
-                </router-link>
-            </transition>
-        </div>
-
-        <div class="sidebar-list-section">
-            <div class="section-container">
-                <h3>내 프로젝트</h3>
-                <div class="scroll-box">
-                    <ul>
-                        <router-link :to="{ name: 'editor' }">
-                            <li class="list">프로젝트 연습</li>
-                            <li class="list">코딩테스트 연습</li>
-                        </router-link>
-
-                    </ul>
-
-
-                </div>
-
-
+        <aside class="sidebar" :class="{ open: isSidebarOpen }">
+            <div class="sidebar-top">
+                <transition name="fade">
+                    <router-link :to="{ name: 'projectCreate' }">
+                        <button v-if="isSidebarOpen" class="create-btn" aria-label="프로젝트 생성">
+                            + 프로젝트 생성
+                        </button>
+                    </router-link>
+                </transition>
             </div>
 
-            <div class="section-container">
-                <h3>참여 프로젝트</h3>
-                <div class="scroll-box">
-                    <ul>
-                        <router-link :to="{ name: 'editor' }">
-                            <li class="list">알고리즘 함께 연습</li>
-                        </router-link>
-                    </ul>
+            <div class="sidebar-list-section">
+                <div class="section-container">
+                    <h3>내 프로젝트</h3>
+                    <div class="scroll-box">
+                        <ul>
+                            <router-link :to="{ name: 'editor' }">
+                                <li class="list">프로젝트 연습</li>
+                                <li class="list">코딩테스트 연습</li>
+                            </router-link>
+
+                        </ul>
+
+
+                    </div>
+                </div>
+
+                <div class="section-container">
+                    <h3>참여 프로젝트</h3>
+                    <div class="scroll-box">
+                        <ul>
+                            <router-link :to="{ name: 'editor' }">
+                                <li class="list">알고리즘 함께 연습</li>
+                            </router-link>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
-    </aside>
+        </aside>
+    </div>
 
 
 </template>

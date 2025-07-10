@@ -2,9 +2,9 @@ import api from "@/plugins/axiosinterceptor";
 
 const projectCreate = async (req) => {
     let data = {};
-    let url = '/api/v1/project';
+    let url = '/api/v1/project/project.json';
 
-    await api.post(url, req)
+    await api.get(url, req)
         .then((res) => {
             data = res.data;
         })
