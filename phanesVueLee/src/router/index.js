@@ -4,7 +4,7 @@ const router = createRouter({
   routes: [
     { path: "/", name: 'main', component: () => import("@/views/Index.vue") },
     { path: "/user/login", name: 'login', component: () => import("@/views/user/Login.vue") },
-    // { path: "/user/signup", name: 'search', component: () => import("@/views/user/Signup.vue") },    
+    { path: "/user/signup", name: 'search', component: () => import("@/views/user/Signup.vue") },    
     { path: "/user/profile", name: 'profile', component: () => import("@/views/user/Profile.vue") },
     { path: "/project/editor", name: 'editor', component: () => import("@/views/project/ProjectPage.vue") },
     { path: "/project/create", name: 'projectCreate', component: () => import("@/views/project/CreateProject.vue") },
