@@ -39,7 +39,7 @@ const logOut = async () => {
         <div v v-if="isLogin">
             <nav class="navbar">
                 <router-link :to="{ name: 'login' }"><button class="login-btn">로그인</button></router-link>
-                <button class="login-btn">회원가입</button>
+                <router-link :to="{name: 'signup' }"><button class="login-btn">회원가입</button></router-link>
             </nav>
         </div>
         <div v v-else>
