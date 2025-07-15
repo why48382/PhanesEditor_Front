@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const isSidebarOpen = ref(false);
 
@@ -7,6 +7,19 @@ const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
 };
 
+
+const projectList = ref([]);
+
+onMounted(() => {
+    const stored = localStorage.getItem('projectList');
+    if (stored) {
+        try {
+            projectList.value = JSON.parse(stored);
+        } catch (e) {
+            console.error('로컬스토리지 파싱 에러:', e);
+        }
+    }
+});
 
 </script>
 
@@ -32,27 +45,25 @@ const toggleSidebar = () => {
                     <h3>내 프로젝트</h3>
                     <div class="scroll-box">
                         <ul>
-                            <router-link :to="{ name: 'editor', params: { id: someId } }">
-                                <li class="list">프로젝트 연습</li>
-                            </router-link>
-                            <router-link :to="{ name: 'editor', params: { id: someId } }">
-                                <li class="list">코딩테스트 연습</li>
-                            </router-link>
-
+                            <li v-for="project in projectList.filter(p => p.isOwner)" :key="project.projectId">
+                                <router-link :to="{ name: 'editor', params: { id: project.projectId } }">
+                                    {{ project.projectName }}
+                                </router-link>
+                            </li>
                         </ul>
-
-
                     </div>
-                </div>
 
-                <div class="section-container">
-                    <h3>참여 프로젝트</h3>
-                    <div class="scroll-box">
-                        <ul>
-                            <router-link :to="{ name: 'editor', params: { id: someId } }">
-                                <li class="list">알고리즘 함께 연습</li>
-                            </router-link>
-                        </ul>
+                    <div class="section-container">
+                        <h3>참여 프로젝트</h3>
+                        <div class="scroll-box">
+                            <ul>
+                                <li v-for="project in projectList.filter(p => !p.isOwner)" :key="project.projectId">
+                                    <router-link :to="{ name: 'editor', params: { id: project.projectId } }">
+                                        {{ project.projectName }}
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

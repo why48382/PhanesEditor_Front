@@ -13,9 +13,9 @@ const openMypage = async () => {
     const data = await api.userMypage();
     if (data && data.success) {
         router.push({ name: 'profile' })
-        alert("응답 성공")
+        // alert("응답 성공")
     } else {
-        alert("응답 실패")
+        // alert("응답 실패")
     }
 
 

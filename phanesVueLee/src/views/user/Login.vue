@@ -36,9 +36,10 @@
   <script setup>
   import { ref, reactive, computed } from 'vue';
   import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'; // 필요한 Firebase 모듈만 임포트
-
-
-
+  // import api from '@/api/user';
+  import projectApi from '@/api/project/project_index.js'
+  import router from '@/router';
+  
   // Firebase 인증 인스턴스 가져오기
   const auth = getAuth();
 
@@ -60,7 +61,7 @@ const handleGoogleSignIn = async () => { // 함수 이름 변경 (충돌 방지)
     // 로그인 성공 후 처리
     const user = result.user;
     console.log("Google Sign-In successful:", user);
-    
+
     // 이메일과 프로바이더 정보 저장
     socialUser.email = user.email || '';
     socialUser.provider = 'google';
@@ -93,12 +94,14 @@ const handleGoogleSignIn = async () => { // 함수 이름 변경 (충돌 방지)
     // --- 여기까지 가짜 로직 ---
   }
   
-  function completeSignUp() {
+  async function completeSignUp() {
     if (!isNicknameValid.value) {
       alert('닉네임을 2자 이상 입력해주세요.');
       return;
     }
-    
+    const projectList = await projectApi.fetchAllProjects();
+    localStorage.setItem("projectList", JSON.stringify(projectList.data)); // .data만 저장
+
     // 실제로는 이 정보를 백엔드 서버로 보내 최종 회원가입을 처리합니다.
     const finalUserData = {
       ...socialUser,
@@ -109,7 +112,7 @@ const handleGoogleSignIn = async () => { // 함수 이름 변경 (충돌 방지)
     alert(`'${nickname.value}'님, 회원가입이 완료되었습니다!`);
     
     // 성공 시, 메인 페이지나 대시보드로 이동하는 로직 추가
-    // router.push('/');
+    router.push('/');
   }
   </script>
   

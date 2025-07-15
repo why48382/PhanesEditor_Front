@@ -1,11 +1,13 @@
 <script setup>
 import useUserStore from '@/stores/useUserStore';
+// import { onMounted } from 'vue';
 
 const userForm = useUserStore();
 console.log(userForm.userObj.email)
 
-const nickname = localStorage.getItem("nickname");
-console.log(nickname);
+// const nickname = localStorage.getItem("nickname");
+// console.log(nickname);
+
 
 </script>
 
@@ -42,7 +44,8 @@ console.log(nickname);
             <div class="info-item">
                 <div class="info-label">이름</div>
                 <div class="info-detail">
-                    <div class="info-value">{{ nickname }}</div>
+                    <!-- <div class="info-value">{{ nickname }}</div> -->
+                    <div class="info-value">이현식</div>
                 </div>
             </div>
 
@@ -68,7 +71,7 @@ console.log(nickname);
             <div class="info-item">
                 <div class="info-label">가입 플랫폼</div>
                 <div class="info-detail">
-                    <div class="info-value">kakao</div>
+                    <div class="info-value">Google</div>
                 </div>
             </div>
         </div>

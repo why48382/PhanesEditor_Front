@@ -17,9 +17,12 @@ const projectCreate = async (req) => {
 
 const fetchAllProjects = async () => {
     let data = {};
-    let url = '/api/v1/projects'; // 데이터를 "가져올" 주소
+    let url = '/api/v1/project_projects.json'; // 데이터를 "가져올" 주소
 
-    
+    // if (userId) {
+    //     url += `?userId=${encodeURIComponent(userId)}`;
+    // } 뭐 이런식으로 url을 변경해서 get방식으로 사용할 수도 있다고 합니다.
+
     await api.get(url)
         .then((res) => {
             // 성공하면, res.data에 프로젝트 목록 배열이 담겨옴.
@@ -38,9 +41,9 @@ const fetchAllProjects = async () => {
  */
 const fetchProjectById = async (projectId) => {
     let data = {};
-    
+
     // 백틱(`)을 사용하여 URL 문자열 안에 ${projectId} 변수를 삽입합니다.
-    let url = `/api/v1/projects/${projectId}`; 
+    let url = `/api/v1/projects/${projectId}`;
 
     console.log("요청할 URL:", url);
 
@@ -62,9 +65,9 @@ const fetchProjectById = async (projectId) => {
  */
 const updateProject = async (projectId, updateData) => {
     let data = {};
-    
+
     // 1. 수정할 대상의 주소를 동적으로 만듭니다.
-    let url = `/api/v1/projects/${projectId}`; 
+    let url = `/api/v1/projects/${projectId}`;
 
     // 2. api.patch를 사용하여, 수정할 내용(updateData)만 서버로 보냅니다.
     await api.patch(url, updateData)
