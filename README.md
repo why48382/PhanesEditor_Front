@@ -40,4 +40,20 @@
 [www.gomorebi.kro.kr](https://www.gomorebi.kro.kr)
 ## 프로젝트 시연
 
+### 로그인
+<img src="https://github.com/beyond-sw-camp/be17-2nd-jamjaris-PhanesEditor/blob/main/img/login.gif" />
+<br>
+
+### 내 정보 조회
+<img src="https://github.com/beyond-sw-camp/be17-2nd-jamjaris-PhanesEditor/blob/main/img/mypage.gif" />
+<br>
+
+### 프로젝트 생성
+<img src="https://github.com/beyond-sw-camp/be17-2nd-jamjaris-PhanesEditor/blob/main/img/projectCreate.gif" />
+<br>
+
+### 에디터 기능
+<img src="https://github.com/beyond-sw-camp/be17-2nd-jamjaris-PhanesEditor/blob/main/img/projectPage.gif" />
+<br>
+
 ## 기술 스택
