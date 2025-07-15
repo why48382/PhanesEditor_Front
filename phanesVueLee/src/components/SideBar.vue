@@ -32,8 +32,10 @@ const toggleSidebar = () => {
                     <h3>내 프로젝트</h3>
                     <div class="scroll-box">
                         <ul>
-                            <router-link :to="{ name: 'editor' }">
+                            <router-link :to="{ name: 'editor', params: { id: someId } }">
                                 <li class="list">프로젝트 연습</li>
+                            </router-link>
+                            <router-link :to="{ name: 'editor', params: { id: someId } }">
                                 <li class="list">코딩테스트 연습</li>
                             </router-link>
 
@@ -47,7 +49,7 @@ const toggleSidebar = () => {
                     <h3>참여 프로젝트</h3>
                     <div class="scroll-box">
                         <ul>
-                            <router-link :to="{ name: 'editor' }">
+                            <router-link :to="{ name: 'editor', params: { id: someId } }">
                                 <li class="list">알고리즘 함께 연습</li>
                             </router-link>
                         </ul>
