@@ -12,7 +12,7 @@
                 placeholder="이메일을 입력해주세요." />
             </div>
             <div class="text-input-wrapper">
-              <input v-model="signUpForm.name" class="text-input" name="name" type="text" placeholder="이름을 입력해주세요." />
+              <input v-model="signUpForm.nickname" class="text-input" name="name" type="text" placeholder="이름을 입력해주세요." />
             </div>
             <div class="text-input-wrapper">
               <input v-model="signUpForm.password" class="text-input" name="password" type="password"
@@ -91,7 +91,7 @@ const router = useRouter()
 
 const signUpForm = reactive({
   email: '',
-  name: '',
+  nickname: '',
   password: ''
 })
 

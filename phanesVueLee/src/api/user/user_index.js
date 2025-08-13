@@ -18,7 +18,7 @@ const userSignUp = async (req) => {
 
 const userSignIn = async (req) => {
     let data = {};
-    let url = '/api/v1/user/login';
+    let url = '/api/v1/login';
 
     await api.post(url, req)
         .then((res) => {
