@@ -1,4 +1,5 @@
 <script setup>
+import TopBar from '@/components/profile/TopBar.vue';
 import useUserStore from '@/stores/useUserStore';
 // import { onMounted } from 'vue';
 
@@ -12,15 +13,8 @@ console.log(userForm.userObj.email)
 </script>
 
 <template>
-    <div class="top-bar">
-        <router-link to="/">
-            <h1>Phanes 계정</h1>
-        </router-link>
-        <div class="profile-icon">
-            <img src="https://lh3.googleusercontent.com/a/ACg8ocIYJXGITMJfJ8BKyRNsFD3n3RPixBPQSWutwuhHxb44cBr74cFC=s288-c-no"
-                class="profile-img" alt="임시 이미지">
-        </div>
-    </div>
+    <TopBar />
+
 
     <div class="profile-area">
         <h2>개인정보</h2>
@@ -87,7 +81,12 @@ console.log(userForm.userObj.email)
             </div>
         </div>
 
-        <div class="update-btn">수정하기</div>
+
+        <div class="update-btn">
+            <RouterLink :to="{ name: 'profileEdit' }">
+                수정하기
+            </RouterLink>
+        </div>
     </div>
 </template>
 
@@ -213,6 +212,12 @@ body {
     border: 1px solid black;
     border-radius: 10px;
     background-color: #2b3a8f;
+    color: white;
+    margin-right: 10px;
+}
+
+.update-btn>a {
+    text-decoration: none;
     color: white;
 }
 </style>
