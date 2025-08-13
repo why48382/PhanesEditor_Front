@@ -2,7 +2,23 @@ import api from "@/plugins/axiosinterceptor";
 
 const userSignUp = async (req) => {
     let data = {};
-    let url = '/api/v1/usr';
+    let url = '/api/v1/user/signup';
+
+    await api.post(url, req)
+        .then((res) => {
+            data = res.data;
+        })
+        .catch((error) => {
+            data = error.data;
+        });
+
+    return data;
+}
+
+
+const userSignIn = async (req) => {
+    let data = {};
+    let url = '/api/v1/user/login';
 
     await api.post(url, req)
         .then((res) => {
@@ -37,12 +53,12 @@ const userMypage = async () => {
     let url = 'api/v1/user/usr_mypage.json'
 
     await api.get(url)
-    .then((res)=>{
-        data = res.data;
-    })
-    .catch((error) => {
-        data = error.data;
-    })
+        .then((res) => {
+            data = res.data;
+        })
+        .catch((error) => {
+            data = error.data;
+        })
     return data;
 }
 
@@ -52,9 +68,9 @@ const userMypage = async () => {
  */
 const fetchUserById = async (userId) => {
     let data = {};
-    
+
     // 백틱(`)을 사용하여 URL 문자열 안에 ${userId} 변수를 삽입합니다.
-    let url = `/api/v1/users/${userId}`; 
+    let url = `/api/v1/users/${userId}`;
 
     console.log("요청할 URL:", url);
 
@@ -76,9 +92,9 @@ const fetchUserById = async (userId) => {
  */
 const updateUser = async (userId, updateData) => {
     let data = {};
-    
+
     // 1. 수정할 대상의 주소를 동적으로 만듭니다.
-    let url = `/api/v1/users/${userId}`; 
+    let url = `/api/v1/users/${userId}`;
 
     // 2. api.patch를 사용하여, 수정할 내용(updateData)만 서버로 보냅니다.
     await api.patch(url, updateData)
@@ -93,4 +109,4 @@ const updateUser = async (userId, updateData) => {
 }
 
 
-export default { userSignUp, fetchUserById, updateUser, userMypage, logOut }
+export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage, logOut }

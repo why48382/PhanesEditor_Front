@@ -14,13 +14,7 @@ import TerminalWindows from "@/components/project/TerminalWindows.vue";
   <div class="layout">
     <SideBar />
     <div class="main">
-      <div class="editor_chat">
-        <Editor />
-        <DosChat />
-      </div>
-      <div class="terminal">
-        <TerminalWindows />
-      </div>
+      <Editor />
     </div>
   </div>
 </template>
