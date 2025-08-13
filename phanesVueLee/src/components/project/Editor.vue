@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, createApp, h } from 'vue';
 import loader from '@monaco-editor/loader';
 import { GoldenLayout } from 'golden-layout';
 import 'golden-layout/dist/css/goldenlayout-base.css';
 import 'golden-layout/dist/css/themes/goldenlayout-light-theme.css';
+import DosChat from "@/components/project/DosChat.vue";
 
 import api from '@/api/file/file_index';
 
@@ -158,6 +159,28 @@ onMounted(async () => {
         });
     });
 
+    goldenLayout.registerComponentFactoryFunction('chat', (container, state) => {
+        const mountEl = document.createElement('div');
+        mountEl.style.cssText = 'height:100%;width:100%';
+        container.element.appendChild(mountEl);
+
+        // DosChat은 props 없이도 동작하므로 그대로 마운트
+        const app = createApp({ render: () => h(DosChat) });
+        app.mount(mountEl);
+
+        // 탭 제목
+        container.setTitle(state?.title ?? 'Chat');
+
+        // 정리(탭 닫힐 때 언마운트)
+        const observer = new MutationObserver(() => {
+            if (!document.body.contains(mountEl)) {
+                try { app.unmount(); } catch { }
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+
     // (선택) AI 패널 placeholder
     goldenLayout.registerComponentFactoryFunction('ai', (container) => {
         const el = document.createElement('div');
@@ -183,8 +206,9 @@ onMounted(async () => {
                         {
                             type: 'stack',
                             content: [
-                                { type: 'component', componentType: 'stdin', title: 'Input' },
-                                { type: 'component', componentType: 'stdout', title: 'Output' },
+                                { type: 'component', componentType: 'chat', title: 'Chat', componentState: { title: 'Chat' } },
+
+
                             ],
                         },
                     ],
@@ -192,7 +216,8 @@ onMounted(async () => {
                 {
                     type: 'row',
                     content: [
-                        { type: 'component', componentType: 'stdin', title: 'Files' },
+                        { type: 'component', componentType: 'stdin', title: 'Input' },
+                        { type: 'component', componentType: 'stdout', title: 'Output' },
                     ],
                 },
             ],
