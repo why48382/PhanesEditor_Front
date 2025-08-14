@@ -1,15 +1,18 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, createApp, h } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount, createApp, h } from 'vue';
+import { useRoute } from 'vue-router';
 import loader from '@monaco-editor/loader';
 import { GoldenLayout } from 'golden-layout';
 import fileApi from '@/api/file/file_index'
 import 'golden-layout/dist/css/goldenlayout-base.css';
 import 'golden-layout/dist/css/themes/goldenlayout-light-theme.css';
 import DosChat from "@/components/project/DosChat.vue";
+import projectApi from '@/api/project/project_index'
 
 import api from '@/api/file/file_index';
 
 const rootEl = ref(null);
+const route = useRoute();
 
 let goldenLayout;                // GoldenLayout 인스턴스
 let monaco;            // Monaco 네임스페이스
@@ -90,8 +93,37 @@ onBeforeUnmount(() => {
 
 });
 
+let fileList = reactive([])
+let memberList = reactive([])
+let chatList = reactive([])
+
+const fetchProjectFiles = async () => {
+    const data = await projectApi.fetchProjectById(route.params.id);
+    if (data && data.success) {
+        if (data.data) {
+            const projectFileList = data.data.projectFile;
+            const projectMemberList = data.data.projectMember;
+            const projectChatList = data.data.projectChat;
+            if (projectFileList.length) {
+                fileList.push(...projectFileList)
+            }
+            if (projectMemberList.length) {
+                memberList.push(...projectMemberList)
+            }
+            if (projectChatList.length) {
+                chatList.push(...projectChatList)
+            }
+        }
+    } else {
+        fileList.splice(0)
+        memberList.splice(0)
+    }
+}
+
 // ====== 마운트 시 초기화 ======
 onMounted(async () => {
+    await fetchProjectFiles();
+
     // 1) Monaco 로드
     monaco = await loader.init();
 
@@ -166,7 +198,9 @@ onMounted(async () => {
         container.element.appendChild(mountEl);
 
         // DosChat은 props 없이도 동작하므로 그대로 마운트
-        const app = createApp({ render: () => h(DosChat) });
+        const app = createApp({
+            render: () => h(DosChat, { chatList: chatList })
+        });
         app.mount(mountEl);
 
         // 탭 제목
@@ -203,7 +237,7 @@ onMounted(async () => {
         container.element.appendChild(root);
 
         // 데이터 로드
-        const treeData = await fileApi.fetchProjectTree(datas.projectId);
+        const treeData = fileList;
 
         // 상태
         const state = {

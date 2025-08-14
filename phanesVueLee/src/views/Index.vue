@@ -1,13 +1,13 @@
 <!-- isLogin 값을 false 할 경우 로그인 된 상태 -->
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import sidebar from '@/components/SideBar.vue'
 import api from '@/api/user/user_index'
 import { useRouter } from 'vue-router'
+
 const isLogin = ref(false);
 const router = useRouter()
-
 
 const openMypage = async () => {
     const data = await api.userMypage();
@@ -23,7 +23,7 @@ const openMypage = async () => {
 
 const logOut = async () => {
     const data = await api.logOut();
-        if (data && data.success) {
+    if (data && data.success) {
         isLogin.value = true;
         router.push({ name: 'main' })
         alert("응답 성공")
@@ -31,6 +31,8 @@ const logOut = async () => {
         alert("응답 실패")
     }
 }
+
+
 </script>
 
 
@@ -39,7 +41,7 @@ const logOut = async () => {
         <div v v-if="isLogin">
             <nav class="navbar">
                 <router-link :to="{ name: 'login' }"><button class="login-btn">로그인</button></router-link>
-                <router-link :to="{name: 'signup' }"><button class="login-btn">회원가입</button></router-link>
+                <router-link :to="{ name: 'signup' }"><button class="login-btn">회원가입</button></router-link>
             </nav>
         </div>
         <div v v-else>

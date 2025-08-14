@@ -84,12 +84,9 @@ import { ref, reactive, computed } from 'vue';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'; // 필요한 Firebase 모듈만 임포트
 // import api from '@/api/user';
 import userApi from '@/api/user/user_index'
-import projectApi from '@/api/project/project_index'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
-const isEmailLogin = ref(false);
 
 const loginForm = reactive({
   email: '',
@@ -175,8 +172,6 @@ async function completeSignUp() {
     alert('닉네임을 2자 이상 입력해주세요.');
     return;
   }
-  const projectList = await projectApi.fetchAllProjects();
-  localStorage.setItem("projectList", JSON.stringify(projectList.data)); // .data만 저장
 
   // 실제로는 이 정보를 백엔드 서버로 보내 최종 회원가입을 처리합니다.
   const finalUserData = {
