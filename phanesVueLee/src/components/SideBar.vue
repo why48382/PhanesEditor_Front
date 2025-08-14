@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import api from '@/api/project/project_index';
 
 const isSidebarOpen = ref(false);
 
@@ -10,7 +11,14 @@ const toggleSidebar = () => {
 
 const projectList = ref([]);
 
-onMounted(() => {
+onMounted(async () => {
+    const data = await api.projectList();
+    if(data) {
+        // 리스트에 넣기
+        console.log("데이터를 가져오는데 성공했습니다.");
+        console.log(data);
+    }
+
     const stored = localStorage.getItem('projectList');
     if (stored) {
         try {

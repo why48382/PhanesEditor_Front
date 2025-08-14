@@ -1,8 +1,23 @@
 import api from "@/plugins/axiosinterceptor";
 
+const projectList = async () => {
+    let data = {};
+    let url = '/api/v1/project/list';
+
+    await api.get(url)
+        .then((res) => {
+            data = res.data;
+        })
+        .catch((error) => {
+            data = error.data;
+        });
+
+    return data;
+}
+
 const projectCreate = async (req) => {
     let data = {};
-    let url = '/api/v1/project/project.json';
+    let url = '/api/v1/project/create';
 
     await api.get(url, req)
         .then((res) => {
@@ -17,7 +32,7 @@ const projectCreate = async (req) => {
 
 const fetchAllProjects = async () => {
     let data = {};
-    let url = '/api/v1/project_projects.json'; // 데이터를 "가져올" 주소
+    let url = '/api/v1/project/fetch'; // 데이터를 "가져올" 주소
 
     // if (userId) {
     //     url += `?userId=${encodeURIComponent(userId)}`;
@@ -103,4 +118,4 @@ const updateProject = async (projectId, updateData) => {
 // }
 
 
-export default { projectCreate, fetchProjectById, fetchAllProjects, updateProject }
+export default { projectCreate, fetchProjectById, fetchAllProjects, updateProject, projectList }
