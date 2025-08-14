@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, createApp, h } from 'vue';
 import loader from '@monaco-editor/loader';
 import { GoldenLayout } from 'golden-layout';
+import fileApi from '@/api/file/file_index'
 import 'golden-layout/dist/css/goldenlayout-base.css';
 import 'golden-layout/dist/css/themes/goldenlayout-light-theme.css';
 import DosChat from "@/components/project/DosChat.vue";
@@ -181,47 +182,195 @@ onMounted(async () => {
         observer.observe(document.body, { childList: true, subtree: true });
     });
 
-    // (선택) AI 패널 placeholder
-    goldenLayout.registerComponentFactoryFunction('ai', (container) => {
-        const el = document.createElement('div');
-        el.style.cssText = 'height:100%;width:100%;display:flex;align-items:center;justify-content:center;color:#888';
-        el.textContent = 'AI Assistant (추후 연결)';
-        container.element.appendChild(el);
+    goldenLayout.registerComponentFactoryFunction('fileTree', async (container) => {
+        const root = document.createElement('div');
+        root.className = 'file-tree monaco-editor vs-dark';
+        root.style.cssText = 'height:100%;width:100%;overflow:auto;';
+
+        // 상단 검색(옵션)
+        const searchWrap = document.createElement('div');
+        searchWrap.className = 'file-tree__search';
+        const search = document.createElement('input');
+        search.type = 'text';
+        search.placeholder = '파일 검색...';
+        searchWrap.appendChild(search);
+
+        const treeWrap = document.createElement('div');
+        treeWrap.className = 'file-tree__wrap';
+
+        root.appendChild(searchWrap);
+        root.appendChild(treeWrap);
+        container.element.appendChild(root);
+
+        // 데이터 로드
+        const treeData = await fileApi.fetchProjectTree(datas.projectId);
+
+        // 상태
+        const state = {
+            expanded: new Set(), // 폴더 펼침 상태
+            selectedPath: null,
+            keyword: '',
+        };
+
+        function isMatch(name, keyword) {
+            if (!keyword) return true;
+            return name.toLowerCase().includes(keyword.toLowerCase());
+        }
+
+        function createRow({ depth, icon, name, isFolder, path, node }) {
+            const row = document.createElement('div');
+            row.className = 'file-tree__row';
+            row.style.paddingLeft = `${depth * 14 + 8}px`;
+
+            const chevron = document.createElement('span');
+            chevron.className = 'file-tree__chevron';
+            chevron.textContent = isFolder ? (state.expanded.has(node) ? '▾' : '▸') : '';
+
+            const ico = document.createElement('span');
+            ico.className = 'file-tree__icon';
+            ico.textContent = icon;
+
+            const label = document.createElement('span');
+            label.className = 'file-tree__label';
+            label.textContent = name;
+
+            if (!isFolder && state.selectedPath === path) {
+                row.classList.add('is-selected');
+            }
+
+            row.appendChild(chevron);
+            row.appendChild(ico);
+            row.appendChild(label);
+
+            // 클릭 동작
+            row.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (isFolder) {
+                    if (state.expanded.has(node)) state.expanded.delete(node);
+                    else state.expanded.add(node);
+                    render();
+                } else {
+                    state.selectedPath = path;
+                    render(); // 선택 하이라이트 갱신
+                    await openFile(path, name);
+                }
+            });
+
+            return row;
+        }
+
+        function walk(nodes, depth = 0, parentVisible = true) {
+            const frag = document.createDocumentFragment();
+            for (const node of nodes) {
+                const isFolder = node.type === 'folder';
+                const name = node.name;
+                const path = node.path || name; // 폴더는 path가 없을 수 있음
+
+                // 검색 필터
+                if (!isMatch(name, state.keyword)) {
+                    // 폴더는 자식 중 매칭이 있으면 보여줘야 함
+                    if (isFolder) {
+                        const childFrag = walk(node.children || [], depth + 1, false);
+                        if (childFrag.childNodes.length > 0) {
+                            // 부모도 보여줌
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+
+                const row = createRow({
+                    depth,
+                    icon: isFolder ? '📁' : '📄',
+                    name,
+                    isFolder,
+                    path,
+                    node,
+                });
+                frag.appendChild(row);
+
+                if (isFolder && state.expanded.has(node)) {
+                    const childFrag = walk(node.children || [], depth + 1, parentVisible);
+                    frag.appendChild(childFrag);
+                }
+            }
+            return frag;
+        }
+
+        function render() {
+            treeWrap.innerHTML = '';
+            treeWrap.appendChild(walk(treeData, 0, true));
+        }
+
+        // 초기: 루트 폴더들 기본 펼침
+        function expandTopLevelFolders(nodes) {
+            for (const n of nodes) {
+                if (n.type === 'folder') state.expanded.add(n);
+            }
+        }
+
+        expandTopLevelFolders(treeData);
+        render();
+
+        // 검색
+        let searchTimer = null;
+        search.addEventListener('input', () => {
+            if (searchTimer) clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                state.keyword = search.value.trim();
+                render();
+            }, 150);
+        });
+
+        // 탭 제목
+        container.setTitle('Project');
+
+        // 메모리 정리(옵션)
+        const observer = new MutationObserver(() => {
+            if (!document.body.contains(root)) {
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     });
+
 
     // 4) 레이아웃 로드 (Judge0 느낌)
     goldenLayout.loadLayout({
-        root: {
-            type: 'column',
-            content: [
+        root:
+        {
+            type: "row", content: [
                 {
-                    type: 'row',
+                    type: 'column',
                     content: [
                         {
-                            type: 'component',
-                            componentType: 'source',
-                            title: 'Source Code',
-                            width: 66,
+                            type: 'row',
+                            content: [
+                                {
+                                    type: 'component',
+                                    componentType: 'fileTree',
+                                    title: 'Project',
+                                    width: 22,        // 좌측 폭
+                                    minWidth: 15,
+                                }, { type: 'component', componentType: 'source', title: 'Source Code' },
+
+                            ],
                         },
                         {
-                            type: 'stack',
+                            type: 'row',
                             content: [
-                                { type: 'component', componentType: 'chat', title: 'Chat', componentState: { title: 'Chat' } },
-
-
+                                { type: 'component', componentType: 'stdin', title: 'Input' },
                             ],
                         },
                     ],
                 },
-                {
-                    type: 'row',
-                    content: [
-                        { type: 'component', componentType: 'stdin', title: 'Input' },
-                        { type: 'component', componentType: 'stdout', title: 'Output' },
-                    ],
-                },
-            ],
-        },
+                { type: 'component', componentType: 'chat', title: 'Chat' },
+            ]
+        }
+
+
     });
 
     // 5) 30초마다 자동 업로드
@@ -263,7 +412,6 @@ onMounted(async () => {
     text-overflow: ellipsis;
 }
 
-/* (옵션) minimap 그림자 항상 보이게: Monaco가 hidden 클래스를 줄 때도 그림자 표시 */
 .monaco-editor .minimap .minimap-shadow-hidden {
     box-shadow: -6px 0 6px rgba(0, 0, 0, 0.3) !important;
     opacity: 1 !important;
