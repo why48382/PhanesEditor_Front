@@ -36,7 +36,7 @@
             </svg>
             <span>이메일로 로그인</span>
           </button>
-          <button class="social-btn google" @click="handleSocialLogin('google')">
+          <!-- <button class="social-btn google" @click="handleSocialLogin('google')">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">
               <path fill="#FFC107"
                 d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z">
@@ -52,14 +52,14 @@
               </path>
             </svg>
             <span>구글로 시작하기</span>
-          </button>
-          <button class="social-btn kakao" @click="handleSocialLogin('kakao')">
+          </button> -->
+          <button class="social-btn kakao" @click="kakaoLogin('kakao')">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
               <path
                 d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.82 0 3.53-.49 5-1.35 0 0 0 0 0 0-1.28-.6-2.28-1.83-2.5-3.32-.02-.15-.03-.3-.03-.45 0-2.42 1.95-4.38 4.38-4.38.35 0 .69.04 1.02.12C20.49 11.47 21 9.82 21 8c0-3.31-2.69-6-6-6-3.31 0-6 2.69-6 6 0 .82.16 1.59.45 2.28-.27 1.49-1.27 2.72-2.55 3.32C6.53 21.51 9.82 22 12 22c5.52 0 10-4.48 10-10 0-.82-.16-1.59-.45-2.28.27-1.49 1.27-2.72 2.55-3.32C21.47 6.49 18.18 6 16 6c-3.31 0-6 2.69-6 6z"
                 fill="#3C1E1E" />
             </svg>
-            <span>카카오로 시작하기</span>
+            <span>카카오로 로그인</span>
           </button>
         </div>
       </div>
@@ -101,6 +101,12 @@ const handleEmailSignUp = async () => {
     router.push('/user/login')
   }
 }
+
+const kakaoLogin = (provider) => {
+  if (provider === 'kakao') {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+  }
+};
 
 
 

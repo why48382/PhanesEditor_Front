@@ -19,9 +19,11 @@ export default defineConfig({
     proxy: {
       // API 요청을 백엔드 서버로 프록시
       '/api': {
-        target: 'http://15.164.170.64:80',
+        target: 'http://localhost:8080',
         changeOrigin: true,
-        secure: false
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api\/v1/, '')
+        
       }
     }
   }
