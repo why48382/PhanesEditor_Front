@@ -341,32 +341,32 @@ onMounted(async () => {
     goldenLayout.loadLayout({
         root:
         {
-            type: "row", content: [
+            type: "row",
+            content: [
                 {
                     type: 'column',
+                    width: 70,
                     content: [
                         {
                             type: 'row',
+                            height: 70,
                             content: [
-                                {
-                                    type: 'component',
-                                    componentType: 'fileTree',
-                                    title: 'Project',
-                                    width: 22,        // 좌측 폭
-                                    minWidth: 15,
-                                }, { type: 'component', componentType: 'source', title: 'Source Code' },
+                                { type: 'component', width: 30, componentType: 'fileTree', title: 'Project', },
+                                { type: 'component', width: 70, componentType: 'source', title: 'Source Code' },
 
                             ],
                         },
                         {
                             type: 'row',
+                            height: 30,
                             content: [
-                                { type: 'component', componentType: 'stdin', title: 'Input' },
+                                { type: 'component', width: 30, componentType: 'stdin', title: 'Input' },
+                                { type: 'component', width: 70, componentType: 'stdout', title: 'Output' },
                             ],
                         },
                     ],
                 },
-                { type: 'component', componentType: 'chat', title: 'Chat' },
+                { type: 'component', width: 30, componentType: 'chat', title: 'Chat' },
             ]
         }
 
