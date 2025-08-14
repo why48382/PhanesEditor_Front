@@ -18,11 +18,7 @@ const userSignUp = async (req) => {
 
 const userSignIn = async (req) => {
     let data = {};
-<<<<<<< HEAD
-    let url = '/login';
-=======
     let url = '/api/v1/login';
->>>>>>> dc911170cca0806dd9d377056fdc134cc3fcb353
 
     await api.post(url, req)
         .then((res) => {
