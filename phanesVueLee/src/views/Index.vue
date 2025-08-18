@@ -5,9 +5,10 @@ import { ref, reactive, onMounted } from 'vue'
 import sidebar from '@/components/SideBar.vue'
 import api from '@/api/user/user_index'
 import { useRouter } from 'vue-router'
+import useUserStore from '@/stores/useUserStore'
 
-const isLogin = ref(false);
-const router = useRouter()
+const userStore = useUserStore();
+const router = useRouter();
 
 const openMypage = async () => {
     const data = await api.userMypage();
@@ -38,7 +39,7 @@ const logOut = async () => {
 
 <template>
     <div>
-        <div v v-if="isLogin">
+        <div v v-if="!userStore.loginCheck()">
             <nav class="navbar">
                 <router-link :to="{ name: 'login' }"><button class="login-btn">로그인</button></router-link>
                 <router-link :to="{ name: 'signup' }"><button class="login-btn">회원가입</button></router-link>
