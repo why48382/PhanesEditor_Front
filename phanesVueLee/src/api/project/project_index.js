@@ -32,7 +32,8 @@ const projectCreate = async (req) => {
 
 const fetchAllProjects = async () => {
     let data = {};
-    let url = '/api/v1/project/fetch'; // 데이터를 "가져올" 주소
+
+    let url = '/api/v1/project/list'; // 데이터를 "가져올" 주소
 
     // if (userId) {
     //     url += `?userId=${encodeURIComponent(userId)}`;
@@ -58,7 +59,7 @@ const fetchProjectById = async (projectId) => {
     let data = {};
 
     // 백틱(`)을 사용하여 URL 문자열 안에 ${projectId} 변수를 삽입합니다.
-    let url = `/api/v1/projects/${projectId}`;
+    let url = `/api/v1/project/read?idx=${projectId}`;
 
     console.log("요청할 URL:", url);
 

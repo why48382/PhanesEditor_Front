@@ -7,9 +7,7 @@ import TerminalWindows from "@/components/project/TerminalWindows.vue";
 </script>
 
 <template>
-  <nav class="navbar">
-    <EdirotFrame />
-  </nav>
+  <EdirotFrame />
 
   <div class="layout">
     <SideBar />

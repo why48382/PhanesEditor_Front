@@ -1,6 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import api from '@/api/project/project_index';
+import { ref, onMounted, reactive } from 'vue';
+import projectApi from '@/api/project/project_index'
+
+let projectList = reactive([])
+
 
 const isSidebarOpen = ref(false);
 
@@ -9,24 +12,29 @@ const toggleSidebar = () => {
 };
 
 
-const projectList = ref([]);
+const fetchAllProjects = async () => {
+    const data = await projectApi.fetchAllProjects();
 
-onMounted(async () => {
-    const data = await api.projectList();
-    if(data) {
-        // 리스트에 넣기
-        console.log("데이터를 가져오는데 성공했습니다.");
-        console.log(data);
-    }
+    if (data && data.success) {
+        //코스 목록 추가
+        if (data.data) {
+            //조회 결과
+            const list = data.data;
 
-    const stored = localStorage.getItem('projectList');
-    if (stored) {
-        try {
-            projectList.value = JSON.parse(stored);
-        } catch (e) {
-            console.error('로컬스토리지 파싱 에러:', e);
+            if (list.length) {
+                projectList.push(...list)
+            }
         }
+    } else {
+        //코스 목록 초기화
+        projectList.splice(0)
     }
+
+}
+
+// 컴포넌트가 화면에 마운트된 후 실행
+onMounted(() => {
+    fetchAllProjects()
 });
 
 </script>
@@ -65,8 +73,8 @@ onMounted(async () => {
                         <h3>참여 프로젝트</h3>
                         <div class="scroll-box">
                             <ul>
-                                <li v-for="project in projectList.filter(p => !p.isOwner)" :key="project.projectId">
-                                    <router-link :to="{ name: 'editor', params: { id: project.projectId } }">
+                                <li v-for="project in projectList" :key="project.idx">
+                                    <router-link :to="{ name: 'editor', params: { id: project.idx } }">
                                         {{ project.projectName }}
                                     </router-link>
                                 </li>
@@ -84,7 +92,7 @@ onMounted(async () => {
 <style scoped>
 /* ★★★★★ 여기가 핵심: 전체 테마 및 버튼 위치 수정 ★★★★★ */
 .sidebar {
-    height: 100vh;
+    height: 80vh;
     width: 265px;
     flex-shrink: 0;
     background-color: #ffffff;

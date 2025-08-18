@@ -1,3 +1,115 @@
+<script setup>
+import { ref, reactive, computed } from 'vue';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'; // 필요한 Firebase 모듈만 임포트
+// import api from '@/api/user';
+import userApi from '@/api/user/user_index'
+import { useRouter } from 'vue-router'
+import useUserStore from '@/stores/useUserStore'
+
+const userStore = useUserStore();
+
+const router = useRouter()
+
+const loginForm = reactive({
+  email: '',
+  password: ''
+})
+
+const kakaoLogin = (provider) => {
+  if (provider === 'kakao') {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+  }
+
+  router.push('/');
+};
+
+const handleEmailSignIn = async () => {
+
+  const data = await userApi.userSignIn(loginForm);
+
+  if (data) {
+    userStore.login(data)
+
+    router.push('/');
+  }
+}
+
+
+// Firebase 인증 인스턴스 가져오기
+const auth = getAuth();
+
+// 'select_provider' (소셜 로그인 선택) 또는 'set_nickname' (닉네임 설정)
+const step = ref('select_provider');
+
+// 소셜 로그인 성공 시 임시로 유저 정보를 담을 객체
+const socialUser = reactive({
+  email: '',
+  provider: '',
+});
+
+
+
+// **Google 로그인 처리 함수 (V9 모듈 방식)**
+const handleGoogleSignIn = async () => { // 함수 이름 변경 (충돌 방지)
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider); // getAuth()로 얻은 auth 인스턴스 사용
+
+    // 로그인 성공 후 처리
+    const user = result.user;
+    console.log("Google Sign-In successful:", user);
+
+    // 이메일과 프로바이더 정보 저장
+    socialUser.email = user.email || '';
+    socialUser.provider = 'google';
+    step.value = 'set_nickname'; // 닉네임 설정 단계로 전환
+
+  } catch (error) {
+    console.error("Google Sign-In error:", error.code, error.message);
+    // 오류 처리: 사용자에게 메시지 표시 등
+    alert(`Google 로그인 중 오류 발생: ${error.message}`);
+  }
+};
+
+
+const nickname = ref('');
+// 닉네임이 2자 이상일 때만 유효하다고 판단
+const isNicknameValid = computed(() => nickname.value.trim().length >= 2);
+
+// 실제로는 백엔드와 연동하여 소셜 로그인 창을 띄우고,
+// 성공 시 콜백을 받아 이메일 등의 정보를 socialUser에 저장해야 합니다.
+function handleSocialLogin(provider) {
+  console.log(`${provider} 소셜 로그인 시작...`);
+
+  // --- 여기는 데모를 위한 가짜 로직입니다 ---
+  // 실제 구현 시, 이 부분은 서버와 통신 후 리다이렉트 되는 로직으로 대체됩니다.
+  setTimeout(() => {
+    socialUser.email = provider === 'google' ? 'user@gmail.com' : 'user@kakao.com';
+    socialUser.provider = provider;
+    step.value = 'set_nickname'; // 닉네임 설정 단계로 전환
+  }, 500);
+  // --- 여기까지 가짜 로직 ---
+}
+
+async function completeSignUp() {
+  if (!isNicknameValid.value) {
+    alert('닉네임을 2자 이상 입력해주세요.');
+    return;
+  }
+
+  // 실제로는 이 정보를 백엔드 서버로 보내 최종 회원가입을 처리합니다.
+  const finalUserData = {
+    ...socialUser,
+    nickname: nickname.value,
+  };
+
+  console.log('최종 회원가입 정보:', JSON.stringify(finalUserData, null, 2));
+  alert(`'${nickname.value}'님, 회원가입이 완료되었습니다!`);
+
+  // 성공 시, 메인 페이지나 대시보드로 이동하는 로직 추가
+  router.push('/');
+}
+</script>
 <template>
   <div class="signup-container">
     <div class="form-wrapper">
@@ -79,118 +191,6 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, computed } from 'vue';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'; // 필요한 Firebase 모듈만 임포트
-// import api from '@/api/user';
-import userApi from '@/api/user/user_index'
-import projectApi from '@/api/project/project_index'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const isEmailLogin = ref(false);
-
-const loginForm = reactive({
-  email: '',
-  password: ''
-})
-
-const kakaoLogin = (provider) => {
-  if (provider === 'kakao') {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
-  }
-
-  router.push('/');
-};
-
-const handleEmailSignIn = async () => {
-
-  const data = await userApi.userSignIn(loginForm);
-
-  if (data) {
-    router.push('/');
-  }
-}
-
-
-// Firebase 인증 인스턴스 가져오기
-const auth = getAuth();
-
-// 'select_provider' (소셜 로그인 선택) 또는 'set_nickname' (닉네임 설정)
-const step = ref('select_provider');
-
-// 소셜 로그인 성공 시 임시로 유저 정보를 담을 객체
-const socialUser = reactive({
-  email: '',
-  provider: '',
-});
-
-
-
-// **Google 로그인 처리 함수 (V9 모듈 방식)**
-const handleGoogleSignIn = async () => { // 함수 이름 변경 (충돌 방지)
-  try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider); // getAuth()로 얻은 auth 인스턴스 사용
-
-    // 로그인 성공 후 처리
-    const user = result.user;
-    console.log("Google Sign-In successful:", user);
-
-    // 이메일과 프로바이더 정보 저장
-    socialUser.email = user.email || '';
-    socialUser.provider = 'google';
-    step.value = 'set_nickname'; // 닉네임 설정 단계로 전환
-
-  } catch (error) {
-    console.error("Google Sign-In error:", error.code, error.message);
-    // 오류 처리: 사용자에게 메시지 표시 등
-    alert(`Google 로그인 중 오류 발생: ${error.message}`);
-  }
-};
-
-
-const nickname = ref('');
-// 닉네임이 2자 이상일 때만 유효하다고 판단
-const isNicknameValid = computed(() => nickname.value.trim().length >= 2);
-
-// 실제로는 백엔드와 연동하여 소셜 로그인 창을 띄우고,
-// 성공 시 콜백을 받아 이메일 등의 정보를 socialUser에 저장해야 합니다.
-function handleSocialLogin(provider) {
-  console.log(`${provider} 소셜 로그인 시작...`);
-
-  // --- 여기는 데모를 위한 가짜 로직입니다 ---
-  // 실제 구현 시, 이 부분은 서버와 통신 후 리다이렉트 되는 로직으로 대체됩니다.
-  setTimeout(() => {
-    socialUser.email = provider === 'google' ? 'user@gmail.com' : 'user@kakao.com';
-    socialUser.provider = provider;
-    step.value = 'set_nickname'; // 닉네임 설정 단계로 전환
-  }, 500);
-  // --- 여기까지 가짜 로직 ---
-}
-
-async function completeSignUp() {
-  if (!isNicknameValid.value) {
-    alert('닉네임을 2자 이상 입력해주세요.');
-    return;
-  }
-  const projectList = await projectApi.fetchAllProjects();
-  localStorage.setItem("projectList", JSON.stringify(projectList.data)); // .data만 저장
-
-  // 실제로는 이 정보를 백엔드 서버로 보내 최종 회원가입을 처리합니다.
-  const finalUserData = {
-    ...socialUser,
-    nickname: nickname.value,
-  };
-
-  console.log('최종 회원가입 정보:', JSON.stringify(finalUserData, null, 2));
-  alert(`'${nickname.value}'님, 회원가입이 완료되었습니다!`);
-
-  // 성공 시, 메인 페이지나 대시보드로 이동하는 로직 추가
-  router.push('/');
-}
-</script>
 
 <style scoped>
 .signup-container {
