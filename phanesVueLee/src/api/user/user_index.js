@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const userSignUp = async (req) => {
     let data = {};
-    let url = '/api/v1/user/signup';
+    let url = '/user/signup';
 
     await api.post(url, req)
         .then((res) => {
