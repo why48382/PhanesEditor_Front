@@ -4,20 +4,27 @@
 
   const socket = ref(null);
 
-  const subscribe = () => {
-    socket.value.subscribe(`/topic/1`, msg => console.log(msg)) // 저기에 newMessage따위가 아니라 프로젝트 idx를 전송해줘야 할것 같음
+  const messageList = ref([ ]);
+
+  const subscribe = () => { // 프로젝트 id 등록시키기
+    socket.value.subscribe(`/topic/1`, msg => {
+      const recevidData = msg.body;
+      messageList.value.push(recevidData);
+      console.log(messageList); // <-- 전달 받은 데이터
+      console.log(messageList.value.length);
+    }); 
   }
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:8080/websocket")
     const client = Stomp.over(ws);
     socket.value = client;
     console.log(client + "클라이언트 내용");
-    
+
 
     client.connect({},
       frame => {
         subscribe();
-       },
+      },
       err => { });
   }
 
@@ -63,8 +70,7 @@
 
   // 메시지 전송 함수
   function sendMessage() {
-    console.log(newMessage.value + "작성한 메시지");
-    socket.value.send(`/app/chat/${newMessage.value}`, {}, "클라이언트가 보낸 메시지");
+    
     if (newMessage.value.trim() === '') return;
 
     const now = new Date();
@@ -75,8 +81,11 @@
       time: now.toTimeString().split(' ')[0],
     };
 
-    messages.value.push(newMsg);
+    // messages.value.push(newMsg);
     newMessage.value = ''; // 입력창 비우기
+
+    console.log(newMessage.value + "작성한 메시지");
+    socket.value.send(`/app/chat/1`, {}, JSON.stringify(newMsg)); // 여기도 id 수정해야 함
 
     // 새 메시지가 추가된 후, 스크롤을 맨 아래로 이동
     nextTick(() => {
@@ -110,6 +119,11 @@
           <span class="timestamp">[{{ msg.sentAt }}]</span>
           <span class="message-user" :style="{ color: getUserColor(msg.username) }">&lt;{{ msg.username }}&gt;</span>
           <span class="message-text">{{ msg.message }}</span>
+        </li>
+        <li v-for="msg in messageList" :key="msg.id" class="message-line">
+          <span class="timestamp">[{{ msg.time }}]</span>
+          <span class="message-user" :style="{ color: getUserColor(msg.user) }">&lt;{{ msg.user }}&gt;</span>
+          <span class="message-text">{{ msg.text }}</span>
         </li>
       </ul>
     </div>
