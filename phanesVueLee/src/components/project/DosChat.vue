@@ -1,5 +1,25 @@
   <script setup lang="ts">
   import { ref, onMounted, nextTick } from 'vue';
+  import Stomp from 'stompjs';
+
+  const socket = ref(null);
+
+  const subscribe = () => {
+    socket.value.subscribe(`/topic/1`, msg => console.log(msg)) // 저기에 newMessage따위가 아니라 프로젝트 idx를 전송해줘야 할것 같음
+  }
+  const connectWebSocket = () => {
+    const ws = new WebSocket("ws://localhost:8080/websocket")
+    const client = Stomp.over(ws);
+    socket.value = client;
+    console.log(client + "클라이언트 내용");
+    
+
+    client.connect({},
+      frame => {
+        subscribe();
+       },
+      err => { });
+  }
 
   const props = defineProps(['chatList'])
 
@@ -43,6 +63,8 @@
 
   // 메시지 전송 함수
   function sendMessage() {
+    console.log(newMessage.value + "작성한 메시지");
+    socket.value.send(`/app/chat/${newMessage.value}`, {}, "클라이언트가 보낸 메시지");
     if (newMessage.value.trim() === '') return;
 
     const now = new Date();
@@ -73,6 +95,7 @@
   // 컴포넌트 마운트 시 입력창에 자동 포커스
   onMounted(() => {
     focusInput();
+    connectWebSocket();
   });
 </script>
 
