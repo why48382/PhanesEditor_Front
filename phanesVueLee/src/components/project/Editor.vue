@@ -8,17 +8,19 @@ import 'golden-layout/dist/css/goldenlayout-base.css';
 import 'golden-layout/dist/css/themes/goldenlayout-light-theme.css';
 import DosChat from "@/components/project/DosChat.vue";
 import projectApi from '@/api/project/project_index'
-
 import api from '@/api/file/file_index';
 
 const rootEl = ref(null);
 const route = useRoute();
 
 let goldenLayout;                // GoldenLayout 인스턴스
-let monaco;            // Monaco 네임스페이스
-let sourceEditor;      // 좌측 코드 에디터
-let stdinEditor;       // 우측 상단 입력 에디터
-let stdoutEditor;      // 우측 하단 출력 에디터
+let monaco;                      // Monaco 네임스페이스
+let sourceEditor;                // 좌측 코드 에디터
+let stdinEditor;                 // 우측 상단 입력 에디터
+let stdoutEditor;                // 우측 하단 출력 에디터
+let sourceContainer;             // source 탭 컨테이너(제목 변경용)
+
+const modelCache = new Map();    // fileId(path/name) → monaco.editor.ITextModel
 
 let uploadTimer = null;
 let fullText = '';
@@ -50,13 +52,10 @@ const EXT_TO_MODE = {
     txt: 'plaintext',
 };
 
-// 파일명 기준으로 Monaco 언어 바꾸기
-function setLanguageByFilename(filename) {
-    const ext = (filename.split('.').pop() || '').toLowerCase();
-    const mode = EXT_TO_MODE[ext] || 'plaintext';
-    if (sourceEditor) {
-        monaco.editor.setModelLanguage(sourceEditor.getModel(), mode);
-    }
+// 파일명 → 언어
+function getLanguageByFilename(filename) {
+    const ext = (filename?.split('.').pop() || '').toLowerCase();
+    return EXT_TO_MODE[ext] || 'plaintext';
 }
 
 // 폰트 사이즈 한번에 변경
@@ -79,9 +78,9 @@ const DEFAULT_STDIN = `3
 3 4
 `;
 
-// ====== 전역 리사이즈 핸들러 (setup 동기 구간에서 등록/해제) ======
+// ====== 전역 리사이즈 핸들러 ======
 const onResize = () => {
-    goldenLayout.updateSize();
+    goldenLayout?.updateSize();
 };
 
 onBeforeUnmount(() => {
@@ -90,34 +89,57 @@ onBeforeUnmount(() => {
         uploadTimer = null;
     }
     window.removeEventListener('resize', onResize);
-
 });
 
-let fileList = reactive([])
-let memberList = reactive([])
-let chatList = reactive([])
+// 프로젝트 데이터
+let fileList = reactive([]);
+let memberList = reactive([]);
+let chatList = reactive([]);
 
 const fetchProjectFiles = async () => {
     const data = await projectApi.fetchProjectById(route.params.id);
     if (data && data.success) {
-        if (data.data) {
-            const projectFileList = data.data.projectFile;
-            const projectMemberList = data.data.projectMember;
-            const projectChatList = data.data.projectChat;
-            if (projectFileList.length) {
-                fileList.push(...projectFileList)
-            }
-            if (projectMemberList.length) {
-                memberList.push(...projectMemberList)
-            }
-            if (projectChatList.length) {
-                chatList.push(...projectChatList)
-            }
+        if (data.results) {
+            const projectFileList = data.results.projectFile || [];
+            const projectMemberList = data.results.projectMember || [];
+            const projectChatList = data.results.projectChat || [];
+            if (projectFileList.length) fileList.push(...projectFileList);
+            if (projectMemberList.length) memberList.push(...projectMemberList);
+            if (projectChatList.length) chatList.push(...projectChatList);
         }
     } else {
-        fileList.splice(0)
-        memberList.splice(0)
+        fileList.splice(0);
+        memberList.splice(0);
     }
+};
+
+// ====== 에디터에 파일 열기(모델 스위칭) ======
+function openFileInEditor(file) {
+    // file: { idx, name, path, type, contents }
+    const fileIdRaw = file.path || file.name || '/untitled';
+    const fileId = fileIdRaw.replace(/^\//, ''); // URI path로 쓰기 위해 선행 슬래시 제거
+    const lang = getLanguageByFilename(file.name);
+    const uri = monaco.Uri.parse(`inmemory:///${encodeURI(fileId)}`);
+
+    let model = modelCache.get(fileId);
+    if (!model) {
+        model = monaco.editor.createModel(file.contents ?? '', lang, uri);
+        modelCache.set(fileId, model);
+    } else {
+        // 기존 모델이면 내용/언어 갱신
+        model.setValue(file.contents ?? '');
+        monaco.editor.setModelLanguage(model, lang);
+    }
+
+    // 에디터에 장착
+    sourceEditor.setModel(model);
+
+    // 탭 제목 및 내부 상태 갱신
+    sourceContainer?.setTitle(file.name || 'Source Code');
+    datas.fileName = file.path || file.name || '/untitled';
+    datas.fileContents = file.contents ?? '';
+    fullText = datas.fileContents;
+    setFontSizeAll(13);
 }
 
 // ====== 마운트 시 초기화 ======
@@ -131,36 +153,36 @@ onMounted(async () => {
     goldenLayout = new GoldenLayout(rootEl.value);
 
     // 3) 컴포넌트 등록
+    // -- Source
     goldenLayout.registerComponentFactoryFunction('source', (container) => {
+        sourceContainer = container;
+
         const el = document.createElement('div');
         el.style.cssText = 'height:100%;width:100%';
         container.element.appendChild(el);
 
+        // 기본 모델 생성 후 장착(값 대신 model 사용)
+        const defaultUri = monaco.Uri.parse('inmemory:///Main.java');
+        const defaultModel = monaco.editor.createModel(DEFAULT_SOURCE, 'java', defaultUri);
+        modelCache.set('Main.java', defaultModel);
+
         sourceEditor = monaco.editor.create(el, {
-            value: DEFAULT_SOURCE,
-            language: 'java',           // 기본값, 아래에서 파일명 기반으로 조정
+            model: defaultModel,
             theme: 'vs-dark',
             automaticLayout: true,
             scrollBeyondLastLine: true,
             minimap: { enabled: true },
         });
 
-        // 파일명에 맞춰 언어 설정
-        setLanguageByFilename(datas.fileName);
         setFontSizeAll(13);
 
-        // 변경 이벤트
-        sourceEditor.onDidChangeModelContent((event) => {
+        sourceEditor.onDidChangeModelContent(() => {
             fullText = sourceEditor.getValue();
             datas.fileContents = fullText;
-            // 필요 시 디버그
-            // event.changes.forEach(change => {
-            //   console.log('입력된 텍스트:', change.text);
-            //   console.log('변경 범위:', change.range);
-            // });
         });
     });
 
+    // -- STDIN
     goldenLayout.registerComponentFactoryFunction('stdin', (container) => {
         const el = document.createElement('div');
         el.style.cssText = 'height:100%;width:100%';
@@ -176,6 +198,7 @@ onMounted(async () => {
         });
     });
 
+    // -- STDOUT
     goldenLayout.registerComponentFactoryFunction('stdout', (container) => {
         const el = document.createElement('div');
         el.style.cssText = 'height:100%;width:100%';
@@ -192,21 +215,19 @@ onMounted(async () => {
         });
     });
 
+    // -- Chat
     goldenLayout.registerComponentFactoryFunction('chat', (container, state) => {
         const mountEl = document.createElement('div');
         mountEl.style.cssText = 'height:100%;width:100%';
         container.element.appendChild(mountEl);
 
-        // DosChat은 props 없이도 동작하므로 그대로 마운트
         const app = createApp({
-            render: () => h(DosChat, { chatList: chatList })
+            render: () => h(DosChat, { chatList })
         });
         app.mount(mountEl);
 
-        // 탭 제목
         container.setTitle(state?.title ?? 'Chat');
 
-        // 정리(탭 닫힐 때 언마운트)
         const observer = new MutationObserver(() => {
             if (!document.body.contains(mountEl)) {
                 try { app.unmount(); } catch { }
@@ -216,12 +237,13 @@ onMounted(async () => {
         observer.observe(document.body, { childList: true, subtree: true });
     });
 
+    // -- 파일 트리
     goldenLayout.registerComponentFactoryFunction('fileTree', async (container) => {
         const root = document.createElement('div');
         root.className = 'file-tree monaco-editor vs-dark';
         root.style.cssText = 'height:100%;width:100%;overflow:auto;';
 
-        // 상단 검색(옵션)
+        // 상단 검색
         const searchWrap = document.createElement('div');
         searchWrap.className = 'file-tree__search';
         const search = document.createElement('input');
@@ -236,10 +258,8 @@ onMounted(async () => {
         root.appendChild(treeWrap);
         container.element.appendChild(root);
 
-        // 데이터 로드
         const treeData = fileList;
 
-        // 상태
         const state = {
             expanded: new Set(), // 폴더 펼침 상태
             selectedPath: null,
@@ -251,10 +271,11 @@ onMounted(async () => {
             return name.toLowerCase().includes(keyword.toLowerCase());
         }
 
-        function createRow({ depth, icon, name, isFolder, path, node }) {
+        function createRow({ idx, depth, icon, name, isFolder, path, node }) {
             const row = document.createElement('div');
             row.className = 'file-tree__row';
             row.style.paddingLeft = `${depth * 14 + 8}px`;
+            row.dataset.fileIdx = idx;
 
             const chevron = document.createElement('span');
             chevron.className = 'file-tree__chevron';
@@ -285,28 +306,33 @@ onMounted(async () => {
                     render();
                 } else {
                     state.selectedPath = path;
-                    render(); // 선택 하이라이트 갱신
-                    await openFile(path, name);
+                    render();
+
+                    const data = await fileApi.openFile(idx);
+                    if (data) {
+                        // 예: {idx, name, path, type, contents}
+                        openFileInEditor(data);
+                    }
                 }
             });
 
             return row;
         }
 
-        function walk(nodes, depth = 0, parentVisible = true) {
+        function walk(nodes, depth = 0) {
             const frag = document.createDocumentFragment();
             for (const node of nodes) {
-                const isFolder = node.type === 'folder';
+                const isFolder = node.type === 'DIRECTORY';
+                const idx = node.idx;
                 const name = node.name;
-                const path = node.path || name; // 폴더는 path가 없을 수 있음
+                const path = node.path || name;
 
                 // 검색 필터
                 if (!isMatch(name, state.keyword)) {
-                    // 폴더는 자식 중 매칭이 있으면 보여줘야 함
                     if (isFolder) {
-                        const childFrag = walk(node.children || [], depth + 1, false);
+                        const childFrag = walk(node.children || [], depth + 1);
                         if (childFrag.childNodes.length > 0) {
-                            // 부모도 보여줌
+                            // 부모도 그려야 하므로 그대로 진행
                         } else {
                             continue;
                         }
@@ -316,6 +342,7 @@ onMounted(async () => {
                 }
 
                 const row = createRow({
+                    idx,
                     depth,
                     icon: isFolder ? '📁' : '📄',
                     name,
@@ -326,7 +353,7 @@ onMounted(async () => {
                 frag.appendChild(row);
 
                 if (isFolder && state.expanded.has(node)) {
-                    const childFrag = walk(node.children || [], depth + 1, parentVisible);
+                    const childFrag = walk(node.children || [], depth + 1);
                     frag.appendChild(childFrag);
                 }
             }
@@ -335,20 +362,18 @@ onMounted(async () => {
 
         function render() {
             treeWrap.innerHTML = '';
-            treeWrap.appendChild(walk(treeData, 0, true));
+            treeWrap.appendChild(walk(treeData, 0));
         }
 
-        // 초기: 루트 폴더들 기본 펼침
         function expandTopLevelFolders(nodes) {
             for (const n of nodes) {
-                if (n.type === 'folder') state.expanded.add(n);
+                if (n.type === 'DIRECTORY') state.expanded.add(n);
             }
         }
 
         expandTopLevelFolders(treeData);
         render();
 
-        // 검색
         let searchTimer = null;
         search.addEventListener('input', () => {
             if (searchTimer) clearTimeout(searchTimer);
@@ -358,10 +383,8 @@ onMounted(async () => {
             }, 150);
         });
 
-        // 탭 제목
         container.setTitle('Project');
 
-        // 메모리 정리(옵션)
         const observer = new MutationObserver(() => {
             if (!document.body.contains(root)) {
                 observer.disconnect();
@@ -370,11 +393,9 @@ onMounted(async () => {
         observer.observe(document.body, { childList: true, subtree: true });
     });
 
-
-    // 4) 레이아웃 로드 (Judge0 느낌)
+    // 4) 레이아웃 로드
     goldenLayout.loadLayout({
-        root:
-        {
+        root: {
             type: "row",
             content: [
                 {
@@ -385,9 +406,8 @@ onMounted(async () => {
                             type: 'row',
                             height: 70,
                             content: [
-                                { type: 'component', width: 30, componentType: 'fileTree', title: 'Project', },
+                                { type: 'component', width: 30, componentType: 'fileTree', title: 'Project' },
                                 { type: 'component', width: 70, componentType: 'source', title: 'Source Code' },
-
                             ],
                         },
                         {
@@ -403,8 +423,6 @@ onMounted(async () => {
                 { type: 'component', width: 30, componentType: 'chat', title: 'Chat' },
             ]
         }
-
-
     });
 
     // 5) 30초마다 자동 업로드
@@ -450,5 +468,62 @@ onMounted(async () => {
     box-shadow: -6px 0 6px rgba(0, 0, 0, 0.3) !important;
     opacity: 1 !important;
     display: block !important;
+}
+
+/* 파일 트리 간단 스타일 */
+.file-tree__search {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.file-tree__search input[type="text"] {
+    width: 100%;
+    height: 28px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #eee;
+    border-radius: 4px;
+}
+
+.file-tree__wrap {
+    padding: 6px 0;
+}
+
+.file-tree__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    line-height: 24px;
+    cursor: pointer;
+    user-select: none;
+    padding-right: 8px;
+}
+
+.file-tree__row:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.file-tree__row.is-selected {
+    background: rgba(90, 160, 255, 0.22);
+}
+
+.file-tree__chevron {
+    width: 14px;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.file-tree__icon {
+    width: 16px;
+    text-align: center;
+}
+
+.file-tree__label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>

@@ -17,9 +17,9 @@ const fetchAllProjects = async () => {
 
     if (data && data.success) {
         //코스 목록 추가
-        if (data.data) {
+        if (data.results) {
             //조회 결과
-            const list = data.data;
+            const list = data.results;
 
             if (list.length) {
                 projectList.push(...list)
