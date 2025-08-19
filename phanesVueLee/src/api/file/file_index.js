@@ -89,31 +89,28 @@ async function fetchProjectTree(projectId) {
     ];
 }
 
-// --- [추가] 파일 읽기 (백엔드 연동 지점) ---
-async function readFileFromServer(projectId, path) {
-    // 예: const { content } = await api.readFile({ projectId, path });
-    // 여기서는 더미 컨텐츠
-    return `// ${path}
-public class Example {
-    public static void main(String[] args) {
-        System.out.println("Loaded: ${path}");
-    }
-}`;
+
+async function openFile(fileIdx) {
+    let data = {};
+    let url = `/api/v1/file/read/${fileIdx}`;
+
+    await api.get(url)
+        .then((res) => {
+            data = res.data;
+        })
+        .catch((error) => {
+            data = error.data;
+        });
+
+    return data;
+
+    //     return {
+    //         idx: fileIdx, name: 'test.java', path: 'test', type: 'FILE', contents: `public class Main {
+    //     public static void main(String[] args) {
+    //         System.out.println("zzz");
+    //     }
+    // }
+    // `};
 }
 
-// --- [추가] 파일 열기 공통 함수 ---
-async function openFile(path, fileName) {
-    try {
-        const content = await readFileFromServer(datas.projectId, path);
-        if (sourceEditor) {
-            sourceEditor.setValue(content ?? '');
-            datas.fileName = fileName || path;
-            setLanguageByFilename(datas.fileName);
-            setFontSizeAll(13);
-        }
-    } catch (e) {
-        if (stdoutEditor) stdoutEditor.setValue(`[openFile error] ${e?.message || e}`);
-    }
-}
-
-export default { projectFile, fetchProjectTree }
+export default { projectFile, fetchProjectTree, openFile }
