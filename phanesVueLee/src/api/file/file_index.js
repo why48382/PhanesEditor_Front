@@ -103,14 +103,6 @@ async function openFile(fileIdx) {
         });
 
     return data;
-
-    //     return {
-    //         idx: fileIdx, name: 'test.java', path: 'test', type: 'FILE', contents: `public class Main {
-    //     public static void main(String[] args) {
-    //         System.out.println("zzz");
-    //     }
-    // }
-    // `};
 }
 
 export default { projectFile, fetchProjectTree, openFile }

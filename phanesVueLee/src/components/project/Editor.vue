@@ -311,7 +311,7 @@ onMounted(async () => {
                     const data = await fileApi.openFile(idx);
                     if (data) {
                         // 예: {idx, name, path, type, contents}
-                        openFileInEditor(data);
+                        openFileInEditor(data.results);
                     }
                 }
             });
