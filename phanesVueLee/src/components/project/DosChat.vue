@@ -9,8 +9,8 @@
   const subscribe = () => { // 프로젝트 id 등록시키기
     socket.value.subscribe(`/topic/1`, msg => {
       const recevidData = msg.body;
-      messageList.value.push(recevidData);
-      console.log(messageList); // <-- 전달 받은 데이터
+      messageList.value.push(JSON.parse(recevidData));
+      console.log(messageList.value[0]); // <-- 전달 받은 데이터
       console.log(messageList.value.length);
     }); 
   }
@@ -18,8 +18,6 @@
     const ws = new WebSocket("ws://localhost:8080/websocket")
     const client = Stomp.over(ws);
     socket.value = client;
-    console.log(client + "클라이언트 내용");
-
 
     client.connect({},
       frame => {
@@ -34,6 +32,7 @@
 
   // 현재 사용자의 닉네임 (나중에 로그인 정보로 대체)
   const currentUser = ref('jamjari1');
+  
 
   // 채팅 메시지 목록 (N:N 채팅을 보여주기 위한 샘플 데이터 포함)
   const messages = ref([
@@ -76,8 +75,8 @@
     const now = new Date();
     const newMsg = {
       id: messages.value.length + 1,
-      user: currentUser.value,
-      text: newMessage.value,
+      username: currentUser.value,
+      message: newMessage.value,
       time: now.toTimeString().split(' ')[0],
     };
 
@@ -122,8 +121,8 @@
         </li>
         <li v-for="msg in messageList" :key="msg.id" class="message-line">
           <span class="timestamp">[{{ msg.time }}]</span>
-          <span class="message-user" :style="{ color: getUserColor(msg.user) }">&lt;{{ msg.user }}&gt;</span>
-          <span class="message-text">{{ msg.text }}</span>
+          <span class="message-user" :style="{ color: getUserColor(msg.username) }">&lt;{{ msg.username }}&gt;</span>
+          <span class="message-text">{{ msg.message }}</span>
         </li>
       </ul>
     </div>
