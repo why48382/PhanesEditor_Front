@@ -9,6 +9,35 @@ import 'golden-layout/dist/css/themes/goldenlayout-light-theme.css';
 import DosChat from "@/components/project/DosChat.vue";
 import projectApi from '@/api/project/project_index'
 import api from '@/api/file/file_index';
+import Stomp from 'stompjs';
+
+
+const code = ref(null);
+const mouse = ref(null);
+const cursor = ref(null);
+
+const socket = ref(null);
+
+const subscribe = () => { // 프로젝트 id 등록시키기
+    socket.value.subscribe(`/topic/1`, msg => {
+        const recevidData = msg.body;
+        messageList.value.push(JSON.parse(recevidData));
+        console.log(messageList.value[0]); // <-- 전달 받은 데이터
+        console.log(messageList.value.length);
+    });
+}
+const connectWebSocket = () => {
+    const ws = new WebSocket("ws://localhost:8080/websocket")
+    const client = Stomp.over(ws);
+    socket.value = client;
+
+    client.connect({},
+        frame => {
+            subscribe();
+        },
+        err => { });
+}
+
 
 const rootEl = ref(null);
 const route = useRoute();
@@ -176,9 +205,18 @@ onMounted(async () => {
 
         setFontSizeAll(13);
 
-        sourceEditor.onDidChangeModelContent(() => {
+        sourceEditor.onDidChangeModelContent((event) => {
             fullText = sourceEditor.getValue();
             datas.fileContents = fullText;
+            event.changes.forEach(change => {
+                // console.log('입력된 텍스트:', change.text);
+                // console.log('변경 범위:', change.range);
+                code.value = {
+                    text: change.text,
+                    range: change.reage
+                }
+                //두개 소켓에 담아서 전송
+            })
         });
     });
 
@@ -439,6 +477,9 @@ onMounted(async () => {
 
     // 6) 리사이즈 핸들링
     window.addEventListener('resize', onResize, { passive: true });
+
+    // 7) 웹소켓 실행
+    connectWebSocket();
 });
 </script>
 

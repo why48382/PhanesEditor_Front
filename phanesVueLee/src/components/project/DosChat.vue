@@ -1,13 +1,17 @@
   <script setup lang="ts">
   import { ref, onMounted, nextTick } from 'vue';
   import Stomp from 'stompjs';
+  import { useRoute } from 'vue-router';
+
+  // const projectId = useRoute().params.id;
+  const projectId = 1;
 
   const socket = ref(null);
 
   const messageList = ref([ ]);
 
   const subscribe = () => { // 프로젝트 id 등록시키기
-    socket.value.subscribe(`/topic/1`, msg => {
+    socket.value.subscribe(`/topic/${projectId}`, msg => {
       const recevidData = msg.body;
       messageList.value.push(JSON.parse(recevidData));
       console.log(messageList.value[0]); // <-- 전달 받은 데이터
@@ -84,7 +88,7 @@
     newMessage.value = ''; // 입력창 비우기
 
     console.log(newMessage.value + "작성한 메시지");
-    socket.value.send(`/app/chat/1`, {}, JSON.stringify(newMsg)); // 여기도 id 수정해야 함
+    socket.value.send(`/app/chat/${projectId}`, {}, JSON.stringify(newMsg)); // 여기도 id 수정해야 함
 
     // 새 메시지가 추가된 후, 스크롤을 맨 아래로 이동
     nextTick(() => {
