@@ -11,36 +11,14 @@ import projectApi from '@/api/project/project_index'
 import api from '@/api/file/file_index';
 import Stomp from 'stompjs';
 
+let isProgrammaticEdit = false;
 
-const code = ref(null);
-const mouse = ref(null);
-const cursor = ref(null);
+const route = useRoute();
 
-const socket = ref(null);
-
-const subscribe = () => { // 프로젝트 id 등록시키기
-    socket.value.subscribe(`/topic/1`, msg => {
-        const recevidData = msg.body;
-        messageList.value.push(JSON.parse(recevidData));
-        console.log(messageList.value[0]); // <-- 전달 받은 데이터
-        console.log(messageList.value.length);
-    });
-}
-const connectWebSocket = () => {
-    const ws = new WebSocket("ws://localhost:8080/websocket")
-    const client = Stomp.over(ws);
-    socket.value = client;
-
-    client.connect({},
-        frame => {
-            subscribe();
-        },
-        err => { });
-}
-
+const projectId = route.params.id;
 
 const rootEl = ref(null);
-const route = useRoute();
+
 
 let goldenLayout;                // GoldenLayout 인스턴스
 let monaco;                      // Monaco 네임스페이스
@@ -124,11 +102,13 @@ onBeforeUnmount(() => {
 let fileList = reactive([]);
 let memberList = reactive([]);
 let chatList = reactive([]);
+let userIdx = '';
 
 const fetchProjectFiles = async () => {
     const data = await projectApi.fetchProjectById(route.params.id);
     if (data && data.success) {
         if (data.results) {
+            userIdx = data.results.userIdx;
             const projectFileList = data.results.projectFile || [];
             const projectMemberList = data.results.projectMember || [];
             const projectChatList = data.results.projectChat || [];
@@ -171,6 +151,47 @@ function openFileInEditor(file) {
     setFontSizeAll(13);
 }
 
+const code = ref({});
+const mouse = ref(null);
+const cursor = ref(null);
+
+const socket = ref(null);
+
+const subscribe = () => { // 프로젝트 id 등록시키기
+    socket.value.subscribe(`/topic/${projectId}`, msg => {
+        code.value = JSON.parse(msg.body);
+
+        if (userIdx != code.value.senderId) {
+
+            isProgrammaticEdit = true;
+            sourceEditor.executeEdits("remote-edit", [
+                {
+                    range: new monaco.Range(
+                        code.value.range.startLineNumber,
+                        code.value.range.startColumn,
+                        code.value.range.endLineNumber,
+                        code.value.range.endColumn
+                    ),
+                    text: code.value.text,
+
+                }
+            ]);
+            isProgrammaticEdit = false;
+        }
+    });
+}
+const connectWebSocket = () => {
+    const ws = new WebSocket("ws://localhost:8080/websocket")
+    const client = Stomp.over(ws);
+    socket.value = client;
+
+    client.connect({},
+        frame => {
+            subscribe();
+        },
+        err => { });
+}
+
 // ====== 마운트 시 초기화 ======
 onMounted(async () => {
     await fetchProjectFiles();
@@ -206,16 +227,18 @@ onMounted(async () => {
         setFontSizeAll(13);
 
         sourceEditor.onDidChangeModelContent((event) => {
+            if (isProgrammaticEdit) return;
             fullText = sourceEditor.getValue();
             datas.fileContents = fullText;
             event.changes.forEach(change => {
-                // console.log('입력된 텍스트:', change.text);
-                // console.log('변경 범위:', change.range);
+                console.log('입력된 텍스트:', change.text);
+                console.log('변경 범위:', change.range);
                 code.value = {
+                    senderId: userIdx,
                     text: change.text,
-                    range: change.reage
+                    range: change.range
                 }
-                //두개 소켓에 담아서 전송
+                socket.value.send(`/app/editor/${projectId}`, {}, JSON.stringify(code.value));
             })
         });
     });
