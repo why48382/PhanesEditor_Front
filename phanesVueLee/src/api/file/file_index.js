@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const projectFile = async (req) => {
     let data = {};
-    let url = '/web02/api/v1/file/upload';
+    let url = '/api/v1/file/upload';
 
     await api.post(url, req)
         .then((res) => {
