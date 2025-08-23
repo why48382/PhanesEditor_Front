@@ -13,6 +13,7 @@ const router = useRouter();
 const openMypage = async () => {
     const data = await api.userMypage();
     if (data && data.success) {
+        userStore.setMypage(data.results)
         router.push({ name: 'profile' })
         // alert("응답 성공")
     } else {

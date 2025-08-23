@@ -50,7 +50,7 @@ const logOut = async () => {
 
 const userMypage = async () => {
     let data = {};
-    let url = 'api/v1/user/usr_mypage.json'
+    let url = 'api/v1/user/usr_mypage'
 
     await api.get(url)
         .then((res) => {

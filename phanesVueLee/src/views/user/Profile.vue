@@ -1,13 +1,21 @@
 <script setup>
 import TopBar from '@/components/profile/TopBar.vue';
 import useUserStore from '@/stores/useUserStore';
+import { computed } from 'vue';
 // import { onMounted } from 'vue';
 
-const userForm = useUserStore();
-console.log(userForm.userObj.email)
+const userStore = useUserStore();
 
-// const nickname = localStorage.getItem("nickname");
-// console.log(nickname);
+
+// 가입날짜 보기좋게 변환
+const createdAtText = computed(() => {
+    if (!userStore.userObj.createdAt) return '';
+    return new Date(userStore.userObj.createdAt).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+});
 
 
 </script>
@@ -36,17 +44,17 @@ console.log(userForm.userObj.email)
             </div>
 
             <div class="info-item">
-                <div class="info-label">이름</div>
+                <div class="info-label">닉네임</div>
                 <div class="info-detail">
                     <!-- <div class="info-value">{{ nickname }}</div> -->
-                    <div class="info-value">이현식</div>
+                    <div class="info-value">{{ userStore.userObj.nickname }}</div>
                 </div>
             </div>
 
             <div class="info-item">
                 <div class="info-label">가입날짜</div>
                 <div class="info-detail">
-                    <div class="info-value">2002년 9월 22일</div>
+                    <div class="info-value">{{ createdAtText }}</div>
                 </div>
             </div>
         </div>
@@ -55,9 +63,9 @@ console.log(userForm.userObj.email)
 
         <div class="info-box">
             <div class="info-item">
-                <div class="info-label">아이디</div>
+                <div class="info-label">이메일</div>
                 <div class="info-detail">
-                    <div class="info-value">why48382@gmail.com</div>
+                    <div class="info-value">{{ userStore.userObj.email }}</div>
                     <!-- 카카오는 못보여줄것 같음 -->
                 </div>
             </div>
@@ -65,7 +73,7 @@ console.log(userForm.userObj.email)
             <div class="info-item">
                 <div class="info-label">가입 플랫폼</div>
                 <div class="info-detail">
-                    <div class="info-value">Google</div>
+                    <div class="info-value">{{ userStore.userObj.platform }}</div>
                 </div>
             </div>
         </div>

@@ -1,65 +1,72 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
-import { EncryptStorage } from 'encrypt-storage'
+import { EncryptStorage } from "encrypt-storage";
 
-const encryptStorage = new EncryptStorage("secret-key-production", { prefix: '@PhanesEditor' })
+const encryptStorage = new EncryptStorage("secret-key-production", { prefix: "@PhanesEditor" });
 
+const useUserStore = defineStore("count", () => {
+  // 화면 바인딩용
+  const userObj = reactive({
+    nickname: "",
+    email: "",
+    createdAt: "",
+    platform: "",
+  });
 
-const useUserStore = defineStore('count', () => {
-    const userObj = reactive({
-        nickname: '',
-        email: ''
-    });
+  // 마이페이지 응답 저장 (nickname/nickName, platform/plafForm 둘 다 대응)
+  const setMypage = (results) => {
+    userObj.nickname  = results?.nickName ?? "";
+    userObj.email     = results?.email ?? "";
+    userObj.createdAt = results?.createdAt ?? "";
+    userObj.platform  = results?.plafForm ??  "";
+  };
 
-    const setWithExpiry = (mode, key, results, ttl) => {
-        const now = new Date()
+  // (로그인 세션 저장: 만료 포함) — 기존 로직 유지하되 parse 보강
+  const setWithExpiry = (mode, key, results, ttl) => {
+    const now = Date.now();
+    let item = {};
 
-        let item = {}
-
-        if (mode === 'LOGIN') {
-            item = {
-                userIdx: results.idx,
-                userEmail: results.email,
-                userName: results.nickname
-            }
-        } else if (mode === 'LXTS') {
-            item = getWithExpiry('store')
-        }
-
-        item.expiry = now.getTime() + Number(ttl) + Number(60000)
-
-        encryptStorage.setItem(key, JSON.stringify(item))
+    if (mode === "LOGIN") {
+      item = {
+        userIdx: results?.idx,
+        userEmail: results?.email,
+        userName: results?.nickname ?? results?.nickName ?? "",
+      };
+    } else if (mode === "LXTS") {
+      item = getWithExpiry("store") ?? {};
     }
 
-    const getWithExpiry = (key) => {
-        const itemStr = encryptStorage.getItem(key)
+    item.expiry = now + Number(ttl) + 60_000;
+    encryptStorage.setItem(key, JSON.stringify(item)); // stringify 했으면…
+  };
 
-        if (!itemStr) {
-            return null
-        }
+  const getWithExpiry = (key) => {
+    const itemStr = encryptStorage.getItem(key);
+    if (!itemStr) return null;
 
-        const item = itemStr
-        const now = new Date()
-
-        if (now.getTime() > Number(item.expiry)) {
-            encryptStorage.removeItem(key)
-            return null
-        }
-
-        return item
+    let item;
+    try {
+      item = typeof itemStr === "string" ? JSON.parse(itemStr) : itemStr; // …반드시 parse
+    } catch {
+      encryptStorage.removeItem(key);
+      return null;
     }
 
-    const loginCheck = () => {
-        return getWithExpiry('store') !== null
+    if (!item?.expiry || Date.now() > Number(item.expiry)) {
+      encryptStorage.removeItem(key);
+      return null;
     }
+    return item;
+    // (참고) encrypt-storage는 객체를 바로 넣어도 되니까
+    // setItem(key, obj) / getItem(key)로 맞추고 stringify/parse를 아예 안 쓰는 방식도 가능.
+  };
 
-    const login = (data) => {
-        setWithExpiry('LOGIN', 'store', data, 86400000)
-    }
+  const loginCheck = () => getWithExpiry("store") !== null;
 
-    return { userObj, loginCheck, login }
-}
+  const login = (data) => setWithExpiry("LOGIN", "store", data, 86_400_000);
 
-);
+  // ✅ setMypage 꼭 export!
+  return { userObj, setMypage, loginCheck, login };
+});
 
-export default useUserStore
+export default useUserStore;
