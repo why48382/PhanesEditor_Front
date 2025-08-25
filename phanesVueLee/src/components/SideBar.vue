@@ -61,7 +61,8 @@ onMounted(() => {
                     <h3>내 프로젝트</h3>
                     <div class="scroll-box">
                         <ul>
-                            <li v-for="project in projectList.filter(p => p.isOwner)" :key="project.projectId">
+                            <!-- .filter(p => p.isOwner) -->
+                            <li v-for="project in projectList" :key="project.projectId">
                                 <router-link :to="{ name: 'editor', params: { id: project.projectId } }">
                                     {{ project.projectName }}
                                 </router-link>
