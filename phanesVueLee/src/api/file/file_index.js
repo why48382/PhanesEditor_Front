@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const projectFile = async (req) => {
     let data = {};
-    let url = '/web02/api/v1/file/upload';
+    let url = '/api/v1/file/upload';
 
     await api.post(url, req)
         .then((res) => {
@@ -103,14 +103,6 @@ async function openFile(fileIdx) {
         });
 
     return data;
-
-    //     return {
-    //         idx: fileIdx, name: 'test.java', path: 'test', type: 'FILE', contents: `public class Main {
-    //     public static void main(String[] args) {
-    //         System.out.println("zzz");
-    //     }
-    // }
-    // `};
 }
 
 export default { projectFile, fetchProjectTree, openFile }
