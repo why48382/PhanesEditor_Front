@@ -19,6 +19,7 @@ const projectId = route.params.id;
 
 const rootEl = ref(null);
 
+let filedIdx = "";
 
 let goldenLayout;                // GoldenLayout 인스턴스
 let monaco;                      // Monaco 네임스페이스
@@ -157,8 +158,15 @@ const cursor = ref(null);
 
 const socket = ref(null);
 
-const subscribe = () => { // 프로젝트 id 등록시키기
-    socket.value.subscribe(`/topic/${projectId}`, msg => {
+const unsubscribe = (fileIdx) => {
+    // 구독 취소 함수
+    socket.value.unsubscribe("file" + fileIdx);
+    // 원래 있었던 방의 번호를 전달해줘야 함.
+    // socket.value.disconnect();
+}
+
+const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
+    socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
         code.value = JSON.parse(msg.body);
 
         if (userIdx != code.value.senderId) {
@@ -178,8 +186,13 @@ const subscribe = () => { // 프로젝트 id 등록시키기
             ]);
             isProgrammaticEdit = false;
         }
-    });
+    }, { id: "file" + fileIdx });
 }
+
+const sendMessage = (mesaage) => {
+    socket.value.send(`/app/editor/${filedIdx}`, {}, JSON.stringify(mesaage));
+}
+
 const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:8080/websocket")
     const client = Stomp.over(ws);
@@ -187,7 +200,6 @@ const connectWebSocket = () => {
 
     client.connect({},
         frame => {
-            subscribe();
         },
         err => { });
 }
@@ -238,7 +250,8 @@ onMounted(async () => {
                     text: change.text,
                     range: change.range
                 }
-                socket.value.send(`/app/editor/${projectId}`, {}, JSON.stringify(code.value));
+                // code.value
+                sendMessage(code.value)
             })
         });
     });
@@ -360,6 +373,9 @@ onMounted(async () => {
 
             // 클릭 동작
             row.addEventListener('click', async (e) => {
+                unsubscribe(filedIdx);
+                filedIdx = idx; // 여기서 변수에 저장이 안될건 또 뭐람
+                subscribe(filedIdx); // 파일 id 넣어 주면 됨
                 e.stopPropagation();
                 if (isFolder) {
                     if (state.expanded.has(node)) state.expanded.delete(node);

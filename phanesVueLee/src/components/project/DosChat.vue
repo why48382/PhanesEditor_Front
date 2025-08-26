@@ -11,7 +11,7 @@
   const messageList = ref([ ]);
 
   const subscribe = () => { // 프로젝트 id 등록시키기
-    socket.value.subscribe(`/topic/${projectId}`, msg => {
+    socket.value.subscribe(`/topic/chat/${projectId}`, msg => {
       const recevidData = msg.body;
       messageList.value.push(JSON.parse(recevidData));
       console.log(messageList.value[0]); // <-- 전달 받은 데이터
