@@ -65,8 +65,19 @@ const useUserStore = defineStore("count", () => {
 
   const login = (data) => setWithExpiry("LOGIN", "store", data, 86_400_000);
 
-  // ✅ setMypage 꼭 export!
-  return { userObj, setMypage, loginCheck, login };
+    const logout = () => {
+    // 1) 저장된 토큰/세션 삭제
+    encryptStorage.removeItem("store");
+
+    // 2) 유저 정보 초기화
+    userObj.nickname = "";
+    userObj.email = "";
+    userObj.createdAt = "";
+    userObj.platform = "";
+  };
+
+  return { userObj, setMypage, loginCheck, login, logout };
+
 });
 
 export default useUserStore;
