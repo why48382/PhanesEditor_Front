@@ -503,16 +503,27 @@ onMounted(async () => {
     });
 
     // 5) 30초마다 자동 업로드
-    if (!uploadTimer) {
-        uploadTimer = setInterval(async () => {
+    document.addEventListener('keydown',async (event) => {
+        if (event.ctrlKey && event.key == 's') {
+            event.preventDefault();
             try {
                 datas.fileContents = sourceEditor?.getValue() ?? '';
                 await api.projectFile(datas);
             } catch (e) {
                 // console.error('[auto-save] error:', e);
             }
-        }, 30 * 1000);
-    }
+        }
+    })
+    // if (!uploadTimer) {
+    //     uploadTimer = setInterval(async () => {
+    //         try {
+    //             datas.fileContents = sourceEditor?.getValue() ?? '';
+    //             await api.projectFile(datas);
+    //         } catch (e) {
+    //             // console.error('[auto-save] error:', e);
+    //         }
+    //     }, 30 * 1000);
+    // }
 
     // 6) 리사이즈 핸들링
     window.addEventListener('resize', onResize, { passive: true });
