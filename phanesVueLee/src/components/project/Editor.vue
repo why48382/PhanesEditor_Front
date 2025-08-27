@@ -34,9 +34,10 @@ let uploadTimer = null;
 let fullText = '';
 
 const datas = {
-    fileName: '/JAVA/hello.java',
-    fileContents: '',
-    projectId: 1,
+    name: '/JAVA/hello.java',
+    contents: '',
+    idx: 1,
+    fileIdx: ''
 };
 
 // 확장자 → Monaco 언어 매핑
@@ -61,8 +62,8 @@ const EXT_TO_MODE = {
 };
 
 // 파일명 → 언어
-function getLanguageByFilename(filename) {
-    const ext = (filename?.split('.').pop() || '').toLowerCase();
+function getLanguageByFilename(name) {
+    const ext = (name?.split('.').pop() || '').toLowerCase();
     return EXT_TO_MODE[ext] || 'plaintext';
 }
 
@@ -131,6 +132,8 @@ function openFileInEditor(file) {
     const lang = getLanguageByFilename(file.name);
     const uri = monaco.Uri.parse(`inmemory:///${encodeURI(fileId)}`);
 
+    datas.fileIdx = file.idx;
+
     let model = modelCache.get(fileId);
     if (!model) {
         model = monaco.editor.createModel(file.contents ?? '', lang, uri);
@@ -146,9 +149,10 @@ function openFileInEditor(file) {
 
     // 탭 제목 및 내부 상태 갱신
     sourceContainer?.setTitle(file.name || 'Source Code');
-    datas.fileName = file.path || file.name || '/untitled';
-    datas.fileContents = file.contents ?? '';
-    fullText = datas.fileContents;
+    // datas.name = file.path || file.name || '/untitled';
+    datas.name = file.name;
+    datas.contents = file.contents ?? '';
+    fullText = datas.contents;
     setFontSizeAll(13);
 }
 
@@ -168,10 +172,12 @@ const unsubscribe = (fileIdx) => {
 const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
     socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
         code.value = JSON.parse(msg.body);
+        isProgrammaticEdit = true;
+        if (code.value.type == "save") {
+            sourceEditor.setValue(code.value.text);
+        } else if (userIdx != code.value.senderId) {
 
-        if (userIdx != code.value.senderId) {
 
-            isProgrammaticEdit = true;
             sourceEditor.executeEdits("remote-edit", [
                 {
                     range: new monaco.Range(
@@ -181,14 +187,12 @@ const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
                         code.value.range.endColumn
                     ),
                     text: code.value.text,
-
                 }
             ]);
-            isProgrammaticEdit = false;
         }
+        isProgrammaticEdit = false;
     }, { id: "file" + fileIdx });
 }
-
 const sendMessage = (mesaage) => {
     socket.value.send(`/app/editor/${filedIdx}`, {}, JSON.stringify(mesaage));
 }
@@ -241,14 +245,15 @@ onMounted(async () => {
         sourceEditor.onDidChangeModelContent((event) => {
             if (isProgrammaticEdit) return;
             fullText = sourceEditor.getValue();
-            datas.fileContents = fullText;
+            datas.contents = fullText;
             event.changes.forEach(change => {
                 console.log('입력된 텍스트:', change.text);
                 console.log('변경 범위:', change.range);
                 code.value = {
                     senderId: userIdx,
                     text: change.text,
-                    range: change.range
+                    range: change.range,
+                    type: "nomal"
                 }
                 // code.value
                 sendMessage(code.value)
@@ -503,21 +508,31 @@ onMounted(async () => {
     });
 
     // 5) 30초마다 자동 업로드
-    document.addEventListener('keydown',async (event) => {
+    document.addEventListener('keydown', async (event) => {
         if (event.ctrlKey && event.key == 's') {
             event.preventDefault();
             try {
-                datas.fileContents = sourceEditor?.getValue() ?? '';
-                await api.projectFile(datas);
-            } catch (e) {
-                // console.error('[auto-save] error:', e);
+                console.log(datas.name + "파일 이름 테스트");
+                datas.contents = sourceEditor?.getValue() ?? '';
+                code.value = {
+                    senderId: userIdx,
+                    text: datas.contents,
+                    // range: change.range,
+                    type: "save"
+                }
+                sendMessage(code.value);
+                console.log(datas);
+                    await api.projectFile(datas);
+                } catch (e) {
+                    // console.error('[auto-save] error:', e);
+                }
             }
-        }
     })
+
     // if (!uploadTimer) {
     //     uploadTimer = setInterval(async () => {
     //         try {
-    //             datas.fileContents = sourceEditor?.getValue() ?? '';
+    //             datas.contents = sourceEditor?.getValue() ?? '';
     //             await api.projectFile(datas);
     //         } catch (e) {
     //             // console.error('[auto-save] error:', e);
