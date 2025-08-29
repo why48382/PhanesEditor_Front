@@ -109,4 +109,4 @@ const updateUser = async (userId, updateData) => {
 }
 
 
-export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage, logOut }
+export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage}
