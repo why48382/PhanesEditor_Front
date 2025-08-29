@@ -1,5 +1,26 @@
 import api from "@/plugins/axiosinterceptor";
 
+const projectSearch = async ({ name, email, language, page = 0, size = 10 }) => {
+  try {
+    const url = '/api/v1/project/search';
+
+    const res = await api.get(url, {
+      params: {
+        name,
+        email,
+        language,
+        page,
+        size
+      }
+    });
+
+    return res.data;
+  } catch (error) {
+    return error.response?.data ?? { success: false, message: "API 요청 실패" };
+  }
+};
+
+
 const projectList = async () => {
     let data = {};
     let url = '/api/v1/project/list';
@@ -119,4 +140,4 @@ const updateProject = async (projectId, updateData) => {
 // }
 
 
-export default { projectCreate, fetchProjectById, fetchAllProjects, updateProject, projectList }
+export default {projectSearch, projectCreate, fetchProjectById, fetchAllProjects, updateProject, projectList }

@@ -3,15 +3,17 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import sidebar from '@/components/SideBar.vue'
-import api from '@/api/user/user_index'
+import userApi from '@/api/user/user_index'
+import projectApi from '@/api/project/project_index'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/useUserStore'
 
 const userStore = useUserStore();
 const router = useRouter();
 
+
 const openMypage = async () => {
-    const data = await api.userMypage();
+    const data = await userApi.userMypage();
     if (data && data.success) {
         userStore.setMypage(data.results)
         router.push({ name: 'profile' })
@@ -24,7 +26,7 @@ const openMypage = async () => {
 }
 
 const logOut = async () => {
-    const data = await api.logOut();
+    const data = await userApi.logOut();
     if (data && data.success) {
         userStore.logout();
         router.push({ name: "main" }).then(() => {
@@ -32,6 +34,21 @@ const logOut = async () => {
         });
     }
 }
+
+
+const projectSearch = async () => {
+  const data = await projectApi.projectSearch({
+    name: userStore.condition.name,
+    email: userStore.condition.email,
+    language: userStore.condition.language,
+    page: userStore.condition.page,
+    size: userStore.condition.size
+});
+
+  if (data && data.success) {
+    router.push({name: "search"});
+  }
+};
 
 
 </script>
@@ -54,10 +71,18 @@ const logOut = async () => {
 
         </div>
 
-        <div class="main-container">
-            <div class="main-title">Phanes</div>
-            <input type="text" class="url-input" placeholder="URL을 입력하세요">
-        </div>
+          <div class="main-container">
+    <div class="main-title">Phanes</div>
+    <div class="search-box">
+      <input 
+        type="text" 
+        class="url-input" 
+        placeholder="URL을 입력하세요" 
+        v-model="userStore.condition.name"
+        @keyup.enter="projectSearch"
+      />
+    </div>
+  </div>
     </div>
 
 </template>
