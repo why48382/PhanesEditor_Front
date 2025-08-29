@@ -23,11 +23,14 @@ const openMypage = async () => {
 
 }
 
-const logOut = () => {
-    userStore.logout();
-    router.push({ name: "main" }).then(() => {
-        window.location.reload();        // 페이지 새로고침
-    });
+const logOut = async () => {
+    const data = await api.logOut();
+    if (data && data.success) {
+        userStore.logout();
+        router.push({ name: "main" }).then(() => {
+            window.location.reload();        // 페이지 새로고침
+        });
+    }
 }
 
 
