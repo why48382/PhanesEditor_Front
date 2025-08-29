@@ -78,26 +78,9 @@ const useUserStore = defineStore("count", () => {
   };
 
   // ====================== 검색 조건 관련 ======================
-  const condition = ref({
-    name: "",
-    email: "",
-    language: "",
-    page: 0,
-    size: 10
-  });
+  
 
-  // (검색 조건 초기화)
-  const resetCondition = () => {
-    condition.value = {
-      name: "",
-      email: "",
-      language: "",
-      page: 0,
-      size: 10
-    };
-  };
-
-  return { userObj, setMypage, loginCheck, login, logout, condition, resetCondition };
+  return { userObj, setMypage, loginCheck, login, logout };
 
 });
 

@@ -7,8 +7,10 @@ import userApi from '@/api/user/user_index'
 import projectApi from '@/api/project/project_index'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/useUserStore'
+import useProjectStore from '@/stores/useProjectStore'
 
 const userStore = useUserStore();
+const projectStore = useProjectStore();
 const router = useRouter();
 
 
@@ -38,14 +40,17 @@ const logOut = async () => {
 
 const projectSearch = async () => {
   const data = await projectApi.projectSearch({
-    name: userStore.condition.name,
-    email: userStore.condition.email,
-    language: userStore.condition.language,
-    page: userStore.condition.page,
-    size: userStore.condition.size
+    name: projectStore.condition.name,
+    email: projectStore.condition.email,
+    language: projectStore.condition.language,
+    page: projectStore.condition.page,
+    size: projectStore.condition.size
 });
 
   if (data && data.success) {
+    // store에 결과 저장
+    projectStore.setResults(data.results.content, data.totalElements);
+
     router.push({name: "search"});
   }
 };
@@ -77,8 +82,8 @@ const projectSearch = async () => {
       <input 
         type="text" 
         class="url-input" 
-        placeholder="URL을 입력하세요" 
-        v-model="userStore.condition.name"
+        placeholder="프로젝트 이름을 입력하세요" 
+        v-model="projectStore.condition.name"
         @keyup.enter="projectSearch"
       />
     </div>

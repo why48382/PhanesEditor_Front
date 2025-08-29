@@ -1,70 +1,73 @@
 <template>
   <div class="page-container">
-    
     <sidebar></sidebar>
 
     <main class="main-content">
+      <!-- 검색창 -->
       <div class="search-section">
         <label for="search-box" class="prompt">&gt; </label>
-        <input 
-          type="text" 
+        <input
+          type="text"
           id="search-box"
-          class="search-input" 
-          v-model="searchQuery" 
-          placeholder="검색할 프로젝트 이름을 입력하세요..."
+          class="search-input"
+          v-model="projectStore.condition.name"
+          placeholder="검색어로 다시 필터링..."
+          @keyup.enter="projectSearch"
         />
       </div>
 
-      <div class="results-section">
-        <ul class="project-list">
-          <li v-for="project in filteredProjects" :key="project.id" class="project-item">
-            <p>
-              <span class="project-name">{{ project.name }}</span>
-              <span class="project-lang">[{{ project.language }}]</span>
-            </p>
-            <p class="project-desc">{{ project.description }}</p>
-            <p class="project-participants">참여자: {{ project.participants }}</p>
-          </li>
-        </ul>
-        <div v-if="filteredProjects.length === 0 && searchQuery" class="no-results">
-          '{{ searchQuery }}'에 대한 검색 결과가 없습니다.
+      <!-- 검색 결과 -->
+     <div class="results-section">
+  <ul class="project-list">
+    <li v-for="project in filteredProjects" :key="project.idx" class="project-item">
+      <!-- 프로젝트 제목 -->
+      <div class="project-header">
+        <h3 class="project-name">{{ project.name }}</h3>
+        <div class="project-meta">
+          <span class="badge">언어: {{ project.language }}</span>
+          <span class="badge">만든사람: {{ project.creator }}</span>
+          <span class="badge like">👍 {{ project.likeCount }}</span>
         </div>
       </div>
+
+      <!-- 설명 -->
+      <p class="project-desc">{{ project.description }}</p>
+    </li>
+  </ul>
+
+</div>
+
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import sidebar from '@/components/SideBar.vue'
+import sidebar from "@/components/SideBar.vue";
+import { computed } from "vue";
+import { useProjectStore } from "@/stores/useProjectStore";
+import projectApi from "@/api/project/project_index";
 
-const isSidebarOpen = ref(true);
-const searchQuery = ref('');
+const projectStore = useProjectStore();
 
-const allProjects = ref([
-  { id: 1, name: 'Phanes Editor 개발', description: '실시간 협업 에디터 메인 프로젝트', language: 'Vue.js', participants: 5 },
-  { id: 2, name: '알고리즘 스터디', description: '백준 문제풀이 및 코드 리뷰', language: 'Python', participants: 3 },
-  { id: 3, name: '개인 포트폴리오 사이트', description: 'Vue3와 TypeScript 기반', language: 'Vue.js', participants: 1 },
-  { id: 4, name: '사이드 프로젝트: 게임 서버', description: 'Spring Boot와 WebSocket 활용', language: 'Java', participants: 4 },
-  { id: 5, name: 'DB 구조 설계', description: 'Phanes Editor의 데이터베이스 모델링', language: 'SQL', participants: 2 },
-]);
-
-const filteredProjects = computed(() => {
-  if (!searchQuery.value) {
-    return allProjects.value;
-  }
-  return allProjects.value.filter(project => {
-    const query = searchQuery.value.toLowerCase();
-    return (
-      project.name.toLowerCase().includes(query) ||
-      project.description.toLowerCase().includes(query)
-    );
+// 서버 호출
+const projectSearch = async () => {
+  const data = await projectApi.projectSearch({
+    name: projectStore.condition.name,   // 검색어
+    email: projectStore.condition.email,
+    language: projectStore.condition.language,
+    page: projectStore.condition.page,
+    size: projectStore.condition.size
   });
-});
 
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value;
+  if (data && data.success) {
+    projectStore.setResults(data.results.content, data.totalElements);
+  } else {
+    projectStore.setResults([], 0);
+  }
 };
+
+// 화면은 항상 store만 바라봄
+const filteredProjects = computed(() => projectStore.searchResults);
 
 </script>
 
@@ -174,14 +177,83 @@ const toggleSidebar = () => {
   border-radius: 8px;
   padding: 15px;
 }
+.results-section {
+  flex-grow: 1;
+  overflow-y: auto;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+}
 
-.project-list { list-style-type: none; padding: 0; margin: 0; }
-.project-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-.project-item:last-child { border-bottom: none; }
-.project-item p { margin: 8px 0; }
-.project-name { font-size: 1.2rem; color: #0056b3; font-weight: 600; }
-.project-lang { margin-left: 10px; background-color: #e9ecef; color: #495057; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
-.project-desc { color: #555; }
-.project-participants { font-size: 0.9rem; color: #888; }
-.no-results { color: #888; }
+/* 리스트 */
+.project-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-item {
+  padding: 18px 0;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s ease;
+}
+
+.project-item:hover {
+  background: #fdfdfd;
+}
+
+/* 제목 */
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.project-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* 메타 */
+.project-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8rem;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 500;
+}
+
+.badge.like {
+  background: #fff0f6;
+  color: #d6336c;
+  font-weight: 600;
+}
+
+/* 설명 */
+.project-desc {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* 결과 없음 */
+.no-results {
+  margin-top: 20px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+
 </style>
