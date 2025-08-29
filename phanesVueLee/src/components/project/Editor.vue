@@ -19,6 +19,7 @@ const projectId = route.params.id;
 
 const rootEl = ref(null);
 
+let filedIdx = "";
 
 let goldenLayout;                // GoldenLayout 인스턴스
 let monaco;                      // Monaco 네임스페이스
@@ -33,9 +34,10 @@ let uploadTimer = null;
 let fullText = '';
 
 const datas = {
-    fileName: '/JAVA/hello.java',
-    fileContents: '',
-    projectId: 1,
+    name: '/JAVA/hello.java',
+    contents: '',
+    idx: 1,
+    fileIdx: ''
 };
 
 // 확장자 → Monaco 언어 매핑
@@ -60,8 +62,8 @@ const EXT_TO_MODE = {
 };
 
 // 파일명 → 언어
-function getLanguageByFilename(filename) {
-    const ext = (filename?.split('.').pop() || '').toLowerCase();
+function getLanguageByFilename(name) {
+    const ext = (name?.split('.').pop() || '').toLowerCase();
     return EXT_TO_MODE[ext] || 'plaintext';
 }
 
@@ -130,6 +132,8 @@ function openFileInEditor(file) {
     const lang = getLanguageByFilename(file.name);
     const uri = monaco.Uri.parse(`inmemory:///${encodeURI(fileId)}`);
 
+    datas.fileIdx = file.idx;
+
     let model = modelCache.get(fileId);
     if (!model) {
         model = monaco.editor.createModel(file.contents ?? '', lang, uri);
@@ -145,9 +149,10 @@ function openFileInEditor(file) {
 
     // 탭 제목 및 내부 상태 갱신
     sourceContainer?.setTitle(file.name || 'Source Code');
-    datas.fileName = file.path || file.name || '/untitled';
-    datas.fileContents = file.contents ?? '';
-    fullText = datas.fileContents;
+    // datas.name = file.path || file.name || '/untitled';
+    datas.name = file.name;
+    datas.contents = file.contents ?? '';
+    fullText = datas.contents;
     setFontSizeAll(13);
 }
 
@@ -157,13 +162,22 @@ const cursor = ref(null);
 
 const socket = ref(null);
 
-const subscribe = () => { // 프로젝트 id 등록시키기
-    socket.value.subscribe(`/topic/${projectId}`, msg => {
+const unsubscribe = (fileIdx) => {
+    // 구독 취소 함수
+    socket.value.unsubscribe("file" + fileIdx);
+    // 원래 있었던 방의 번호를 전달해줘야 함.
+    // socket.value.disconnect();
+}
+
+const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
+    socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
         code.value = JSON.parse(msg.body);
+        isProgrammaticEdit = true;
+        if (code.value.type == "save") {
+            sourceEditor.setValue(code.value.text);
+        } else if (userIdx != code.value.senderId) {
 
-        if (userIdx != code.value.senderId) {
 
-            isProgrammaticEdit = true;
             sourceEditor.executeEdits("remote-edit", [
                 {
                     range: new monaco.Range(
@@ -173,13 +187,16 @@ const subscribe = () => { // 프로젝트 id 등록시키기
                         code.value.range.endColumn
                     ),
                     text: code.value.text,
-
                 }
             ]);
-            isProgrammaticEdit = false;
         }
-    });
+        isProgrammaticEdit = false;
+    }, { id: "file" + fileIdx });
 }
+const sendMessage = (mesaage) => {
+    socket.value.send(`/app/editor/${filedIdx}`, {}, JSON.stringify(mesaage));
+}
+
 const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:8080/websocket")
     const client = Stomp.over(ws);
@@ -187,7 +204,6 @@ const connectWebSocket = () => {
 
     client.connect({},
         frame => {
-            subscribe();
         },
         err => { });
 }
@@ -229,16 +245,18 @@ onMounted(async () => {
         sourceEditor.onDidChangeModelContent((event) => {
             if (isProgrammaticEdit) return;
             fullText = sourceEditor.getValue();
-            datas.fileContents = fullText;
+            datas.contents = fullText;
             event.changes.forEach(change => {
                 console.log('입력된 텍스트:', change.text);
                 console.log('변경 범위:', change.range);
                 code.value = {
                     senderId: userIdx,
                     text: change.text,
-                    range: change.range
+                    range: change.range,
+                    type: "nomal"
                 }
-                socket.value.send(`/app/editor/${projectId}`, {}, JSON.stringify(code.value));
+                // code.value
+                sendMessage(code.value)
             })
         });
     });
@@ -360,6 +378,9 @@ onMounted(async () => {
 
             // 클릭 동작
             row.addEventListener('click', async (e) => {
+                unsubscribe(filedIdx);
+                filedIdx = idx; // 여기서 변수에 저장이 안될건 또 뭐람
+                subscribe(filedIdx); // 파일 id 넣어 주면 됨
                 e.stopPropagation();
                 if (isFolder) {
                     if (state.expanded.has(node)) state.expanded.delete(node);
@@ -487,16 +508,37 @@ onMounted(async () => {
     });
 
     // 5) 30초마다 자동 업로드
-    if (!uploadTimer) {
-        uploadTimer = setInterval(async () => {
+    document.addEventListener('keydown', async (event) => {
+        if (event.ctrlKey && event.key == 's') {
+            event.preventDefault();
             try {
-                datas.fileContents = sourceEditor?.getValue() ?? '';
-                await api.projectFile(datas);
-            } catch (e) {
-                // console.error('[auto-save] error:', e);
+                console.log(datas.name + "파일 이름 테스트");
+                datas.contents = sourceEditor?.getValue() ?? '';
+                code.value = {
+                    senderId: userIdx,
+                    text: datas.contents,
+                    // range: change.range,
+                    type: "save"
+                }
+                sendMessage(code.value);
+                console.log(datas);
+                    await api.projectFile(datas);
+                } catch (e) {
+                    // console.error('[auto-save] error:', e);
+                }
             }
-        }, 30 * 1000);
-    }
+    })
+
+    // if (!uploadTimer) {
+    //     uploadTimer = setInterval(async () => {
+    //         try {
+    //             datas.contents = sourceEditor?.getValue() ?? '';
+    //             await api.projectFile(datas);
+    //         } catch (e) {
+    //             // console.error('[auto-save] error:', e);
+    //         }
+    //     }, 30 * 1000);
+    // }
 
     // 6) 리사이즈 핸들링
     window.addEventListener('resize', onResize, { passive: true });

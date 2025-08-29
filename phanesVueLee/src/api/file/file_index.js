@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const projectFile = async (req) => {
     let data = {};
-    let url = '/api/v1/file/upload';
+    let url = '/api/v1/file/register'; // 임시로 레지스터로 받게 하기
 
     await api.post(url, req)
         .then((res) => {
