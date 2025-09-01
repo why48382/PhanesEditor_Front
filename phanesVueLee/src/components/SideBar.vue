@@ -92,18 +92,18 @@ onMounted(() => {
 <style scoped>
 /* ★★★★★ 여기가 핵심: 전체 테마 및 버튼 위치 수정 ★★★★★ */
 .sidebar {
-    height: 80vh;
-    width: 265px;
-    flex-shrink: 0;
-    background-color: #ffffff;
-    /* 흰색 배경 */
-    border-right: 1px solid #e5e5e5;
-    /* 연한 회색 테두리 */
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow: hidden;
+  width: 280px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-right: 1px solid #e5e5e5;
+  padding: 20px;
+  padding-top: 60px;
+  transition: margin-left 0.3s ease-in-out;
+  margin-left: 0;
+
+  height: 100vh;           /* 화면 높이 꽉 채우기 */
+  overflow-y: auto;        /* 넘치면 스크롤 */
+  box-sizing: border-box;  /* padding 포함해서 높이 계산 */
 
 }
 

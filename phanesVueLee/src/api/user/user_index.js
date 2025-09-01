@@ -33,9 +33,9 @@ const userSignIn = async (req) => {
 
 const logOut = async () => {
     let data = {};
-    let url = '/api/v1/user/usr_logout.json';
+    let url = '/api/v1/user/logout';
 
-    await api.get(url)
+    await api.post(url)
         .then((res) => {
             data = res.data;
         })
@@ -109,4 +109,4 @@ const updateUser = async (userId, updateData) => {
 }
 
 
-export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage, logOut }
+export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage, logOut}
