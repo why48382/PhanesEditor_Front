@@ -176,8 +176,6 @@ const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
         if (code.value.type == "save") {
             sourceEditor.setValue(code.value.text);
         } else if (userIdx != code.value.senderId) {
-
-
             sourceEditor.executeEdits("remote-edit", [
                 {
                     range: new monaco.Range(

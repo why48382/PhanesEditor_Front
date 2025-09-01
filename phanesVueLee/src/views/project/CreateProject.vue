@@ -8,7 +8,7 @@
           <input 
             type="text" 
             id="project-name" 
-            v-model.trim="project.name" 
+            v-model.trim="project.projectName" 
             placeholder=" " 
             ref="nameInputRef"
             @keydown.enter.prevent="handleEnterKey('name')" 
@@ -60,11 +60,11 @@
         <div v-if="steps.showInvite" class="form-group">
           <label for="project-invite">동료 초대하기 (선택 사항)</label>
           <div class="invite-input-wrapper">
-              <input type="text" id="project-invite" v-model.trim="invitee" @keydown.enter.prevent="addInvitee" placeholder="초대할 사용자 ID 또는 닉네임" ref="inviteInputRef"/>
+              <input type="text" id="project-invite" v-model.trim="userId" @keydown.enter.prevent="addInvitee" placeholder="초대할 사용자 ID 또는 닉네임" ref="inviteInputRef"/>
             <button @click="addInvitee" class="add-btn">추가</button>
           </div>
-          <div class="invitee-list" v-if="project.invitees.length > 0">
-            <span v-for="(user, index) in project.invitees" :key="index" class="invitee-tag">
+          <div class="invitee-list" v-if="project.userId.length > 0">
+            <span v-for="(user, index) in project.userId" :key="index" class="invitee-tag">
               {{ user }}
               <button @click="removeInvitee(index)" class="remove-tag-btn">×</button>
             </span>
@@ -99,13 +99,13 @@ const steps = reactive({
 });
 
 const project = reactive({
-  name: '',
+  projectName: '',
   description: '',
   language: '',
-  invitees: [],
+  userId: '',
 });
 
-const isNameValid = computed(() => project.name.trim().length >= 2);
+const isNameValid = computed(() => project.projectName.trim().length >= 2);
 
 async function proceedToNextStep(stepName) {
   if (stepName === 'description' && isNameValid.value && !steps.showDescription) {
@@ -147,14 +147,14 @@ function handleEnterKey(currentStep, event = null) {
 const invitee = ref('');
 function addInvitee() {
   const valueToAdd = invitee.value.trim();
-  if (valueToAdd !== '' && !project.invitees.includes(valueToAdd)) {
-    project.invitees.push(valueToAdd);
+  if (valueToAdd !== '' && !project.userId.includes(valueToAdd)) {
+    project.userId.push(valueToAdd);
   }
   invitee.value = '';
 }
 
 function removeInvitee(index) {
-  project.invitees.splice(index, 1);
+  project.userId.splice(index, 1);
 }
 
 async function createProject() {
@@ -163,9 +163,9 @@ async function createProject() {
     return;
   }
   console.log('생성될 프로젝트 정보:', JSON.stringify(project, null, 2));
-  alert(`'${project.name}' 프로젝트 생성을 요청했습니다!`);
+  alert(`'${project.projectName}' 프로젝트 생성을 요청했습니다!`);
 
-  const data = await api.projectCreate(project);
+  const data = await api.projectCreate(JSON.stringify(project));
 
   if (data && data.success) {
     alert("응답 성공 ")

@@ -19,7 +19,7 @@ const projectCreate = async (req) => {
     let data = {};
     let url = '/api/v1/project/create';
 
-    await api.get(url, req)
+    await api.post(url, req, {headers: {'Content-Type': 'application/json'}})
         .then((res) => {
             data = res.data;
         })
