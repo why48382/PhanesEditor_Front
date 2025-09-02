@@ -1,14 +1,13 @@
   <script setup lang="ts">
   import { ref, onMounted, nextTick } from 'vue';
   import Stomp from 'stompjs';
-  import { useRoute } from 'vue-router';
+  import api from '@/api/chat/chat_index'
 
-  // const projectId = useRoute().params.id;
-  const projectId = 1;
+  let projectId = window.location.pathname.split('/')[3];
 
   const socket = ref(null);
 
-  const messageList = ref([ ]);
+  const messageList = ref([]);
 
   const subscribe = () => { // 프로젝트 id 등록시키기
     socket.value.subscribe(`/topic/chat/${projectId}`, msg => {
@@ -16,7 +15,7 @@
       messageList.value.push(JSON.parse(recevidData));
       console.log(messageList.value[0]); // <-- 전달 받은 데이터
       console.log(messageList.value.length);
-    }); 
+    });
   }
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:8080/websocket")
@@ -36,7 +35,7 @@
 
   // 현재 사용자의 닉네임 (나중에 로그인 정보로 대체)
   const currentUser = ref('jamjari1');
-  
+
 
   // 채팅 메시지 목록 (N:N 채팅을 보여주기 위한 샘플 데이터 포함)
   const messages = ref([
@@ -72,8 +71,8 @@
   // --- 메시지 전송 및 UI 처리 ---
 
   // 메시지 전송 함수
-  function sendMessage() {
-    
+  async function sendMessage() {
+
     if (newMessage.value.trim() === '') return;
 
     const now = new Date();
@@ -84,8 +83,21 @@
       time: now.toTimeString().split(' ')[0],
     };
 
+    const chats = {
+      projectId: projectId,
+      message: newMessage.value // 이거만 잘 설정하면 됨
+    }
+
     // messages.value.push(newMsg);
     newMessage.value = ''; // 입력창 비우기
+
+
+    console.log(chats.message + "채팅 메시지 테스트");
+    const data = await api.chatCreate(chats);
+
+    if (data) {
+      // 데이터 잘 받아옴 굳
+    }
 
     console.log(newMessage.value + "작성한 메시지");
     socket.value.send(`/app/chat/${projectId}`, {}, JSON.stringify(newMsg)); // 여기도 id 수정해야 함
