@@ -98,6 +98,10 @@ onBeforeUnmount(() => {
         uploadTimer = null;
     }
     window.removeEventListener('resize', onResize);
+
+    // 🔑 Monaco 모델 정리
+    monaco?.editor.getModels().forEach(model => model.dispose());
+    modelCache.clear();
 });
 
 // 프로젝트 데이터
