@@ -19,7 +19,9 @@
             <li v-for="project in filteredProjects" :key="project.idx" class="project-item">
               <!-- 프로젝트 제목 -->
               <div class="project-header">
+                <router-link :to="{ name: 'editor', params: { id: project.idx } }">
                 <h3 class="project-name">{{ project.name }}</h3>
+                </router-link>
                 <div class="project-meta">
                   <span class="badge">언어: {{ project.language }}</span>
                   <span class="badge">만든사람: {{ project.creator }}</span>
