@@ -5,45 +5,33 @@
       <p class="subtitle">새로운 협업 공간을 만들고 동료를 초대하세요.</p>
 
       <div class="form-group floating-label" :class="{ 'is-valid': isNameValid }">
-          <input 
-            type="text" 
-            id="project-name" 
-            v-model.trim="project.projectName" 
-            placeholder=" " 
-            ref="nameInputRef"
-            @keydown.enter.prevent="handleEnterKey('name')" 
-          />
+        <input type="text" id="project-name" v-model.trim="project.projectName" placeholder=" " ref="nameInputRef"
+          @keydown.enter.prevent="handleEnterKey('name')" />
         <label for="project-name">프로젝트 이름</label>
-          <button 
-            v-if="isNameValid" 
-            @click="proceedToNextStep('description')" 
-            class="icon-btn-next"
-            aria-label="다음 단계로"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19,7v4H5.83l3.58-3.59L8,6l-6,6l6,6l1.41-1.41L5.83,13H21V7H19z"></path></svg>
+        <button v-if="isNameValid" @click="proceedToNextStep('description')" class="icon-btn-next" aria-label="다음 단계로">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19,7v4H5.83l3.58-3.59L8,6l-6,6l6,6l1.41-1.41L5.83,13H21V7H19z"></path>
+          </svg>
         </button>
       </div>
 
       <Transition name="slide-fade">
         <div v-if="steps.showDescription" class="form-group floating-label">
-            <textarea 
-              id="project-description" 
-              v-model="project.description" 
-              rows="4" 
-              placeholder=" " 
-              ref="descriptionInputRef" 
-              @keydown.enter="handleEnterKey('description', $event)"
-            ></textarea>
+          <textarea id="project-description" v-model="project.description" rows="4" placeholder=" "
+            ref="descriptionInputRef" @keydown.enter="handleEnterKey('description', $event)"></textarea>
           <label for="project-description">프로젝트 설명 (선택 사항)</label>
           <button @click="proceedToNextStep('language')" class="icon-btn-next" aria-label="다음 단계로">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19,7v4H5.83l3.58-3.59L8,6l-6,6l6,6l1.41-1.41L5.83,13H21V7H19z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19,7v4H5.83l3.58-3.59L8,6l-6,6l6,6l1.41-1.41L5.83,13H21V7H19z"></path>
+            </svg>
           </button>
         </div>
       </Transition>
 
       <Transition name="slide-fade">
         <div v-if="steps.showLanguage" class="form-group floating-label">
-            <select id="project-language" v-model="project.language" @change="proceedToNextStep('invite')" ref="languageSelectRef">
+          <select id="project-language" v-model="project.language" @change="proceedToNextStep('invite')"
+            ref="languageSelectRef">
             <option disabled selected value="">언어를 선택하세요</option>
             <option value="javascript">JavaScript</option>
             <option value="python">Python</option>
@@ -60,7 +48,8 @@
         <div v-if="steps.showInvite" class="form-group">
           <label for="project-invite">동료 초대하기 (선택 사항)</label>
           <div class="invite-input-wrapper">
-              <input type="text" id="project-invite" v-model.trim="userId" @keydown.enter.prevent="addInvitee" placeholder="초대할 사용자 ID 또는 닉네임" ref="inviteInputRef"/>
+            <input type="text" id="project-invite" v-model.trim="userId" @keydown.enter.prevent="addInvitee"
+              placeholder="초대할 사용자 ID 또는 닉네임" ref="inviteInputRef" />
             <button @click="addInvitee" class="add-btn">추가</button>
           </div>
           <div class="invitee-list" v-if="project.userId.length > 0">
@@ -169,7 +158,7 @@ async function createProject() {
 
   if (data && data.success) {
     alert("응답 성공 ")
-    router.push({ name: 'editor' });
+    router.push({ name: 'editor', params: { id: data.results.idx }});
   } else {
     alert("응답 실패")
   }
