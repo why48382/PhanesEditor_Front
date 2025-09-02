@@ -505,7 +505,7 @@ onMounted(async () => {
         }
     });
 
-    // 5) 30초마다 자동 업로드
+    // 5) ctrl + s 누르면
     document.addEventListener('keydown', async (event) => {
         if (event.ctrlKey && event.key == 's') {
             event.preventDefault();
@@ -526,7 +526,7 @@ onMounted(async () => {
                 }
             }
     })
-
+    // 5) 30초마다 자동 업로드
     // if (!uploadTimer) {
     //     uploadTimer = setInterval(async () => {
     //         try {
