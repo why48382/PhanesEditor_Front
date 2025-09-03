@@ -158,6 +158,7 @@ async function createProject() {
 
   if (data && data.success) {
     alert("응답 성공 ")
+    console.log(data.results);
     router.push({ name: 'editor', params: { id: data.results.idx }});
   } else {
     alert("응답 실패")

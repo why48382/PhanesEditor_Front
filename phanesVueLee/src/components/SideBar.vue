@@ -2,7 +2,7 @@
 import { ref, onMounted, reactive } from 'vue';
 import projectApi from '@/api/project/project_index'
 
-let projectList = reactive([])
+const projectList = ref([])
 
 
 const isSidebarOpen = ref(false);
@@ -22,7 +22,7 @@ const fetchAllProjects = async () => {
             const list = data.results;
 
             if (list.length) {
-                projectList.push(...list)
+                projectList.value.push(...list)
             }
         }
     } else {
