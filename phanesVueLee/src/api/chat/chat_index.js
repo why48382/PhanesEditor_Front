@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const chatCreate = async (req) => {
     let data = {};
-    let url = '/api/v1/chat/register';
+    let url = '/chat/register';
 
     await api.post(url, req)
         .then((res) => {

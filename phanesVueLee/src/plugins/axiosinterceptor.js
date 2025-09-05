@@ -1,13 +1,19 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: '',
-    timeout: 5000
+    baseURL: 'https://api.gomorebi.kro.kr',
+    timeout: 5000,
+    withCredentials: true
+
 })
 
 api.interceptors.request.use(
     (config) => {
         console.log("요청 보내기 전 실행");
+        console.log("📤 요청 URL:", config.baseURL + config.url);
+        console.log("📤 요청 메서드:", config.method);
+        console.log("📤 요청 데이터:", config.data);
+        console.log("📤 withCredentials:", config.withCredentials); // ✅ 여기 추가
         return config;
     },
     (error) => {

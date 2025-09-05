@@ -18,7 +18,7 @@
     });
   }
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://localhost:8080/websocket")
+    const ws = new WebSocket("ws://api.gomorebi.kro.kr/websocket")
     const client = Stomp.over(ws);
     socket.value = client;
 

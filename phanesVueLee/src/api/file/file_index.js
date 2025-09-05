@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const projectFile = async (req) => {
     let data = {};
-    let url = '/api/v1/file/register'; // 임시로 레지스터로 받게 하기
+    let url = '/file/register'; // 임시로 레지스터로 받게 하기
 
     await api.post(url, req)
         .then((res) => {
@@ -92,7 +92,7 @@ async function fetchProjectTree(projectId) {
 
 async function openFile(fileIdx) {
     let data = {};
-    let url = `/api/v1/file/read/${fileIdx}`;
+    let url = `/file/read/${fileIdx}`;
 
     await api.get(url)
         .then((res) => {
