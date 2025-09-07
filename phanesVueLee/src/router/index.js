@@ -10,6 +10,7 @@ const router = createRouter({
     { path: "/project/editor/:id", name: "editor", component: () => import("@/views/project/ProjectPage.vue") }, // 파라미터를 받게 변경
     { path: "/project/create", name: 'projectCreate', component: () => import("@/views/project/CreateProject.vue") },
     { path: "/project/search", name: 'search', component: () => import("@/components/project/Search.vue") },
+    { path: "/oauth2/success", name: 'oauth2Success', component: () => import("@/views/OAuth2Success.vue") },
   ],
 })
 
