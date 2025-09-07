@@ -200,7 +200,7 @@ const sendMessage = (mesaage) => {
 }
 
 const connectWebSocket = () => {
-    const ws = new WebSocket("ws://api.gomorebi.kro.kr/websocket")
+    const ws = new WebSocket("wss://api.gomorebi.kro.kr/websocket")
     const client = Stomp.over(ws);
     socket.value = client;
 
