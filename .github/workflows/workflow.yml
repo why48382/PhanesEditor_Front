@@ -44,14 +44,15 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 222
           script: |
-            if kubectl get svc phanes-front-svc -n lhs -o wide | grep -q "green"; then  
-              CURRENT_VER="green"  
-              NEXT_VER="blue"  
-            else  
-              CURRENT_VER="blue"  
-              NEXT_VER="green"  
-            fi  
+            if kubectl get svc phanes-front-svc -n lhs -o wide | grep -q "green"; then
+              CURRENT_VER="green"
+              NEXT_VER="blue"
+            else
+              CURRENT_VER="blue"
+              NEXT_VER="green"
+            fi
 
+            # --- Deployment YAML ---
             cat <<EOF | kubectl apply -f -
             apiVersion: apps/v1
             kind: Deployment
@@ -75,38 +76,39 @@ jobs:
                   containers:
                     - name: container
                       image: why48382/phanes-front-k8s:${{ github.run_number }}
-                      livenessProbe:
-                        httpGet:
+                      livenessProbe: # <-- 들여쓰기 확인 (2칸 공백)
+                        httpGet:     # <-- 들여쓰기 확인 (4칸 공백)
                           path: /health
                           port: 80
                         initialDelaySeconds: 20
                         periodSeconds: 10
-                        readinessProbe:
-                          httpGet:
-                            path: /test
-                              port: 80
-                            initialDelaySeconds: 20
-                            periodSeconds: 10
-                          successThreshold: 3
-                        terminationGracePeriodSeconds: 0
+                      readinessProbe: # <-- 들여쓰기 확인 (2칸 공백)
+                        httpGet:     # <-- 들여쓰기 확인 (4칸 공백)
+                          path: /test
+                          port: 80
+                        initialDelaySeconds: 20
+                        periodSeconds: 10
+                        successThreshold: 3 # <-- 39번째 줄 근처, 들여쓰기 확인 (6칸 공백)
+                  terminationGracePeriodSeconds: 0
             EOF
 
-            kubectl rollout status deployment/phanes-front-deployment-${NEXT_VER} -lhs  
+            kubectl rollout status deployment/phanes-front-deployment-${NEXT_VER} -n lhs
 
-            cat <<EOF | kubectl apply -f -  
-            apiVersion: v1  
-            kind: Service  
-            metadata:  
+            # --- Service YAML ---
+            cat <<EOF | kubectl apply -f -
+            apiVersion: v1
+            kind: Service
+            metadata:
               name: phanes-front-svc
-              namespace: lhs  
-            spec:  
-              selector:  
-                type: front  
-                ver: ${NEXT_VER}  
-              ports:  
+              namespace: lhs
+            spec:
+              selector:
+                type: front
+                ver: ${NEXT_VER}
+              ports:
                 - port: 80
                   targetPort: 80
-              type: LoadBalancer  
-            EOF  
+              type: LoadBalancer
+            EOF
 
             kubectl scale deployment phanes-front-deployment-${CURRENT_VER} -n lhs --replicas=0
