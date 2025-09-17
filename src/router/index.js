@@ -11,6 +11,8 @@ const router = createRouter({
     { path: "/project/create", name: 'projectCreate', component: () => import("@/views/project/CreateProject.vue") },
     { path: "/project/search", name: 'search', component: () => import("@/components/project/Search.vue") },
     { path: "/oauth2/success", name: 'oauth2Success', component: () => import("@/views/OAuth2Success.vue") },
+    { path: "/test", component: () => import("@/views/Health.vue") },
+    { path: "/health", component: () => import("@/views/Test.vue") },
   ],
 })
 
