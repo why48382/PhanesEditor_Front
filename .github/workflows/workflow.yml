@@ -52,44 +52,44 @@ jobs:
               NEXT_VER="green"  
             fi  
             
-            cat <<EOF | kubectl apply -f -  
-            apiVersion: apps/v1  
-            kind: Deployment  
-            metadata:  
-              name: phanes-front-deployment-${NEXT_VER}  
-              namespace: lhs  
-            spec:  
-              selector:  
-                matchLabels:  
-                  type: front  
-                  ver: ${NEXT_VER}  
-              replicas: 1  
-              strategy:  
-                type: RollingUpdate  
-              template:  
-                metadata:  
-                  labels:  
-                    type: front  
-                    ver: ${NEXT_VER}  
-                spec:  
-                  containers:  
-                    - name: container  
-                      image: why48382/phanes-front-k8s:${{ github.run_number }}  
-                      livenessProbe:  
-                        httpGet:  
-                          path: /health  
-                          port: 80  
-                        initialDelaySeconds: 20  
-                        periodSeconds: 10  
-                      readinessProbe:  
-                        httpGet:  
-                          path: /test  
+            cat <<EOF | kubectl apply -f -
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: phanes-front-deployment-${NEXT_VER}
+              namespace: lhs
+            spec:
+              selector:
+                matchLabels:
+                  type: front
+                  ver: ${NEXT_VER}
+              replicas: 1
+              strategy:
+                type: RollingUpdate
+              template:
+                metadata:
+                  labels:
+                    type: front
+                    ver: ${NEXT_VER}
+                spec:
+                  containers:
+                    - name: container
+                      image: why48382/phanes-front-k8s:${{ github.run_number }}
+                      livenessProbe:
+                        httpGet:
+                          path: /health
                           port: 80
-                        initialDelaySeconds: 20  
-                        periodSeconds: 10  
-                        successThreshold: 3  
-                  terminationGracePeriodSeconds: 0  
-            EOF  
+                        initialDelaySeconds: 20
+                        periodSeconds: 10
+                        readinessProbe:
+                          httpGet:
+                            path: /test
+                              port: 80
+                            initialDelaySeconds: 20
+                            periodSeconds: 10
+                          successThreshold: 3
+                        terminationGracePeriodSeconds: 0
+            EOF
             
             kubectl rollout status deployment/phanes-front-deployment-${NEXT_VER} -lhs  
             
