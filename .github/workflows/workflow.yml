@@ -76,6 +76,8 @@ jobs:
                   containers:
                     - name: container
                       image: why48382/phanes-front-k8s:${{ github.run_number }}
+                      ports:
+                      - containerPort: 80
                       livenessProbe: # <-- 들여쓰기 확인 (2칸 공백)
                         httpGet:     # <-- 들여쓰기 확인 (4칸 공백)
                           path: /health
