@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phanes-front-deployment-jenkins
+  namespace: lhs
+spec:
+  selector:
+    matchLabels:
+      type: front
+      ver: gen
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        type: front
+        ver: gen
+    spec:
+      containers:
+        - name: container
+          image: why48382/phanes-front-k8s:latest
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /test
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            successThreshold: 3
+      terminationGracePeriodSeconds: 0
