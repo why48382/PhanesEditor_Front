@@ -2,6 +2,7 @@
   import { ref, onMounted, nextTick } from 'vue';
   import Stomp from 'stompjs';
   import api from '@/api/chat/chat_index'
+  import Ws from '@/websocket/websocket.js'
 
   let projectId = window.location.pathname.split('/')[3];
 
@@ -18,7 +19,7 @@
     });
   }
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://api.gomorebi.kro.kr/websocket")
+    const ws = new WebSocket(Ws)
     const client = Stomp.over(ws);
     socket.value = client;
 

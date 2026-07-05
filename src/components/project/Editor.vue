@@ -10,6 +10,7 @@ import DosChat from "@/components/project/DosChat.vue";
 import projectApi from '@/api/project/project_index'
 import api from '@/api/file/file_index';
 import Stomp from 'stompjs';
+import Ws from '@/websocket/websocket.js'
 
 let isProgrammaticEdit = false;
 
@@ -200,7 +201,7 @@ const sendMessage = (mesaage) => {
 }
 
 const connectWebSocket = () => {
-    const ws = new WebSocket("wss://api.gomorebi.kro.kr/websocket")
+    const ws = new WebSocket(Ws)
     const client = Stomp.over(ws);
     socket.value = client;
 
