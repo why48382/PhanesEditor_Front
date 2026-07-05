@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: 'https://api.gomorebi.kro.kr',
+    baseURL: '/api',
     timeout: 5000,
     withCredentials: true
 
