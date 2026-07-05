@@ -15,7 +15,7 @@ const loginForm = reactive({
 
 const kakaoLogin = (provider) => {
   if (provider === 'kakao') {
-    window.location.href = 'https://api.gomorebi.kro.kr/oauth2/authorization/kakao';
+    window.location.href = '/oauth2/authorization/kakao';
   }
 
   router.push('/');
