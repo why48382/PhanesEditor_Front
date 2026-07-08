@@ -18,19 +18,22 @@
       console.log(messageList.value.length);
     });
   }
+
   const connectWebSocket = () => {
-    const ws = new WebSocket(Ws)
+    const ws = new WebSocket(Ws.WS_URL);
     const client = Stomp.over(ws);
     socket.value = client;
 
-    client.connect({},
+    client.connect(
+      {},
       frame => {
-        subscribe();
+        console.log("WebSocket 연결 성공", frame);
       },
-      err => { });
+      err => {
+        console.error("WebSocket 연결 실패", err);
+      }
+    );
   }
-
-  const props = defineProps(['chatList'])
 
   // --- 상태 관리 ---
 
