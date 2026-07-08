@@ -48,18 +48,30 @@
         <div v-if="steps.showInvite" class="form-group">
           <label for="project-invite">동료 초대하기 (선택 사항)</label>
           <div class="invite-input-wrapper">
-            <input type="text" id="project-invite" v-model.trim="userId" @keydown.enter.prevent="addInvitee"
-              placeholder="초대할 사용자 ID 또는 닉네임" ref="inviteInputRef" />
+            <input
+              type="text"
+              id="project-invite"
+              v-model.trim="invitee"
+              @keydown.enter.prevent="addInvitee"
+              placeholder="초대할 사용자 번호(숫자)"
+              ref="inviteInputRef"
+            />
             <button @click="addInvitee" class="add-btn">추가</button>
           </div>
-          <div class="invitee-list" v-if="project.userId.length > 0">
-            <span v-for="(user, index) in project.userId" :key="index" class="invitee-tag">
-              {{ user }}
-              <button @click="removeInvitee(index)" class="remove-tag-btn">×</button>
-            </span>
+
+          <div class="invitee-list" v-if="project.memberIdx.length > 0">
+      <span
+        v-for="(idx, i) in project.memberIdx"
+        :key="idx"
+        class="invitee-tag"
+      >
+        {{ idx }}
+        <button @click="removeInvitee(i)" class="remove-tag-btn">×</button>
+      </span>
           </div>
         </div>
       </Transition>
+
       <Transition name="slide-fade">
         <button v-if="steps.showSubmit" @click="createProject" :disabled="!isNameValid" class="submit-btn">
           프로젝트 생성하기
@@ -91,7 +103,8 @@ const project = reactive({
   projectName: '',
   description: '',
   language: '',
-  userId: '',
+  userId: '', // 값이 사용되고 있지 않음
+  memberIdx: [],
 });
 
 const isNameValid = computed(() => project.projectName.trim().length >= 2);
@@ -134,16 +147,29 @@ function handleEnterKey(currentStep, event = null) {
 }
 
 const invitee = ref('');
+
 function addInvitee() {
-  const valueToAdd = invitee.value.trim();
-  if (valueToAdd !== '' && !project.userId.includes(valueToAdd)) {
-    project.userId.push(valueToAdd);
+  const raw = invitee.value.trim();
+
+  if (raw === '') return;
+
+  const idx = Number(raw);
+
+  if (!Number.isInteger(idx)) {
+    alert('유효한 회원 번호(숫자)를 입력해주세요.');
+    invitee.value = '';
+    return;
   }
+
+  if (!project.memberIdx.includes(idx)) {
+    project.memberIdx.push(idx);
+  }
+
   invitee.value = '';
 }
 
 function removeInvitee(index) {
-  project.userId.splice(index, 1);
+  project.memberIdx.splice(index, 1);
 }
 
 async function createProject() {
