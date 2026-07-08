@@ -166,8 +166,12 @@ const mouse = ref(null);
 const cursor = ref(null);
 
 const socket = ref(null);
+let isSocketConnected = false;
+let pendingFileIdx = null;
 
 const unsubscribe = (fileIdx) => {
+    if (!fileIdx || !socket.value || !isSocketConnected) return;
+
     // 구독 취소 함수
     socket.value.unsubscribe("file" + fileIdx);
     // 원래 있었던 방의 번호를 전달해줘야 함.
@@ -175,7 +179,16 @@ const unsubscribe = (fileIdx) => {
 }
 
 const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
-    socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
+  console.log("subscribe 호출");
+  if (!fileIdx) return;
+
+  if (!socket.value || !isSocketConnected) {
+    pendingFileIdx = fileIdx;
+    return;
+  }
+
+  console.log("subscribe 호출");
+  socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
         code.value = JSON.parse(msg.body);
         isProgrammaticEdit = true;
         if (code.value.type == "save") {
@@ -197,18 +210,33 @@ const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
     }, { id: "file" + fileIdx });
 }
 const sendMessage = (mesaage) => {
+    if (!socket.value || !isSocketConnected || !filedIdx) return;
+
     socket.value.send(`/app/editor/${filedIdx}`, {}, JSON.stringify(mesaage));
 }
 
 const connectWebSocket = () => {
-    const ws = new WebSocket(Ws)
-    const client = Stomp.over(ws);
-    socket.value = client;
+  const ws = new WebSocket(Ws.WS_URL);
+  const client = Stomp.over(ws);
+  socket.value = client;
 
-    client.connect({},
-        frame => {
-        },
-        err => { });
+  client.connect(
+    {},
+    frame => {
+      isSocketConnected = true;
+
+      if (pendingFileIdx) {
+        const fileIdx = pendingFileIdx;
+        pendingFileIdx = null;
+        subscribe(fileIdx);
+      }
+      console.log("WebSocket 연결 성공", frame);
+    },
+    err => {
+      isSocketConnected = false;
+      console.error("WebSocket 연결 실패", err);
+    }
+  );
 }
 
 // ====== 마운트 시 초기화 ======
@@ -381,23 +409,29 @@ onMounted(async () => {
 
             // 클릭 동작
             row.addEventListener('click', async (e) => {
-                unsubscribe(filedIdx);
-                filedIdx = idx; // 여기서 변수에 저장이 안될건 또 뭐람
-                subscribe(filedIdx); // 파일 id 넣어 주면 됨
                 e.stopPropagation();
+
                 if (isFolder) {
                     if (state.expanded.has(node)) state.expanded.delete(node);
                     else state.expanded.add(node);
                     render();
-                } else {
-                    state.selectedPath = path;
-                    render();
+                    return;
+                }
 
-                    const data = await fileApi.openFile(idx);
-                    if (data) {
-                        // 예: {idx, name, path, type, contents}
-                        openFileInEditor(data.results);
-                    }
+                if (filedIdx !== idx) {
+                    if (filedIdx) unsubscribe(filedIdx);
+                    filedIdx = idx;
+                    subscribe(filedIdx);
+                } else {
+                    subscribe(filedIdx);
+                }
+
+                state.selectedPath = path;
+                render();
+
+                const data = await fileApi.openFile(idx);
+                if (data) {
+                    openFileInEditor(data.results);
                 }
             });
 
