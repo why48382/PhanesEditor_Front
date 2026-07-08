@@ -22,12 +22,17 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/api\/v1/, '')
+        rewrite: (path) => path.replace(/^\/api/, '')
       },
       '/oauth2': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: true,
+      },
+      '/websocket': {
+        target: 'http://localhost:8080',
+        ws: true,
+        changeOrigin: true,
       }
     }
   }
