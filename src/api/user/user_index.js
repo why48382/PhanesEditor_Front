@@ -15,7 +15,6 @@ const userSignUp = async (req) => {
     return data;
 }
 
-
 const userSignIn = async (req) => {
     let data = {};
     let url = '/login';
@@ -46,8 +45,6 @@ const logOut = async () => {
     return data;
 }
 
-// 벡엔드 호출 후 받은 데이터를 반환
-
 const userMypage = async () => {
     let data = {};
     let url = '/user/usr_mypage'
@@ -62,10 +59,6 @@ const userMypage = async () => {
     return data;
 }
 
-/**
- * 특정 ID를 가진 유저 하나의 정보를 불러오는 함수
- * @param {number | string} userId - 조회하고 싶은 유저의 ID
- */
 const fetchUserById = async (userId) => {
     let data = {};
 
@@ -85,14 +78,8 @@ const fetchUserById = async (userId) => {
     return data;
 }
 
-/**
- * 특정 유저의 정보를 부분적으로 수정하는 함수
- * @param {number | string} userId - 수정할 유저의 ID
- * @param {object} updateData - 수정할 내용이 담긴 객체
- */
 const updateUser = async (userId, updateData) => {
     let data = {};
-
     // 1. 수정할 대상의 주소를 동적으로 만듭니다.
     let url = `/users/${userId}`;
 
@@ -108,5 +95,22 @@ const updateUser = async (userId, updateData) => {
     return data;
 }
 
+const findUserNickname = async (nickname) => {
+    let data = {};
+    let url = `/users/search`;
 
-export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage, logOut}
+    console.log("요청할 URL:", url);
+
+    await api.get(url, {params: {nickname}})
+      .then((res) => {
+          data = res.data;
+      })
+      .catch((error) => {
+          data = error.data;
+      });
+
+    return data;
+}
+
+
+export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage, logOut, findUserNickname}
