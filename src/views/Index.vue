@@ -11,12 +11,8 @@ const userStore = useUserStore();
 const projectStore = useProjectStore();
 const router = useRouter();
 
-const openMypage = async () => {
-    const data = await userApi.userMypage();
-    if (data && data.success) {
-        userStore.setMypage(data.results)
-        router.push({ name: 'profile' })
-    }
+const openMyPage = async () => {
+    router.push({ name: 'profile' })
 }
 
 const logOut = async () => {
@@ -55,7 +51,7 @@ const projectSearch = async () => {
         </div>
         <div v-else>
             <nav class="navbar">
-                <button @click="openMypage" class="login-btn">mypage</button>
+                <button @click="openMyPage" class="login-btn">mypage</button>
                 <button @click="logOut" class="login-btn">로그아웃</button>
             </nav>
             <sidebar></sidebar>
