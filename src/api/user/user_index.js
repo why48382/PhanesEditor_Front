@@ -11,7 +11,6 @@ const userSignUp = async (req) => {
         .catch((error) => {
             data = error.data;
         });
-
     return data;
 }
 
@@ -26,7 +25,6 @@ const userSignIn = async (req) => {
         .catch((error) => {
             data = error.data;
         });
-
     return data;
 }
 
@@ -41,11 +39,10 @@ const logOut = async () => {
         .catch((error) => {
             data = error.data;
         });
-
     return data;
 }
 
-const userMypage = async () => {
+const userMyPage = async () => {
     let data = {};
     let url = '/user/usr_mypage'
 
@@ -74,30 +71,12 @@ const fetchUserById = async (userId) => {
         .catch((error) => {
             data = error.data;
         });
-
-    return data;
-}
-
-const updateUser = async (userId, updateData) => {
-    let data = {};
-    // 1. 수정할 대상의 주소를 동적으로 만듭니다.
-    let url = `/users/${userId}`;
-
-    // 2. api.patch를 사용하여, 수정할 내용(updateData)만 서버로 보냅니다.
-    await api.patch(url, updateData)
-        .then((res) => {
-            data = res.data;
-        })
-        .catch((error) => {
-            data = error.data;
-        });
-
     return data;
 }
 
 const findUserNickname = async (nickname) => {
     let data = {};
-    let url = `/users/search`;
+    let url = `/user/search`;
 
     console.log("요청할 URL:", url);
 
@@ -108,9 +87,25 @@ const findUserNickname = async (nickname) => {
       .catch((error) => {
           data = error.data;
       });
-
     return data;
 }
 
+const upDateUser = async (nickname, profileImage) => {
+    let data = {};
+    let url = `/user/usr_mypage/update`;
 
-export default { userSignUp, userSignIn, fetchUserById, updateUser, userMypage, logOut, findUserNickname}
+    const formData = new FormData();
+    if (nickname) formData.append('nickname', nickname);
+    if (profileImage) formData.append('profileImage', profileImage);
+
+    await api.post(url, formData)
+        .then((res) => {
+            data = res.data;
+        })
+        .catch((error) => {
+            data = error.data;
+        });
+    return data;
+}
+
+export default { userSignUp, userSignIn, fetchUserById, upDateUser, userMyPage, logOut, findUserNickname}
