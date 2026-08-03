@@ -1,130 +1,121 @@
-  <script setup lang="ts">
-  import { ref, onMounted, nextTick } from 'vue';
-  import Stomp from 'stompjs';
-  import api from '@/api/chat/chat_index'
-  import Ws from '@/websocket/websocket.js'
+<script setup>
+import { ref, onMounted, nextTick } from 'vue';
+import Stomp from 'stompjs';
+import api from '@/api/chat/chat_index'
+import Ws from '@/websocket/websocket.js'
 
-  let projectId = window.location.pathname.split('/')[3];
-
-  const socket = ref(null);
-
-  const messageList = ref([]);
-
-  const subscribe = () => { // 프로젝트 id 등록시키기
-    socket.value.subscribe(`/topic/chat/${projectId}`, msg => {
-      const recevidData = msg.body;
-      messageList.value.push(JSON.parse(recevidData));
-      console.log(messageList.value[0]); // <-- 전달 받은 데이터
-      console.log(messageList.value.length);
-    });
+const props = defineProps({
+  chatList: {
+    type: Array,
+    default: () => []
   }
+});
 
-  const connectWebSocket = () => {
-    const ws = new WebSocket(Ws.WS_URL);
-    const client = Stomp.over(ws);
-    socket.value = client;
+let projectId = window.location.pathname.split('/')[3];
 
-    client.connect(
-      {},
-      frame => {
-        console.log("WebSocket 연결 성공", frame);
-      },
-      err => {
-        console.error("WebSocket 연결 실패", err);
-      }
-    );
-  }
+const socket = ref(null);
 
-  // --- 상태 관리 ---
+const messageList = ref([]); // 실시간으로 새로 들어오는 메시지
 
-  // 현재 사용자의 닉네임 (나중에 로그인 정보로 대체)
-  const currentUser = ref('jamjari1');
-
-
-  // 채팅 메시지 목록 (N:N 채팅을 보여주기 위한 샘플 데이터 포함)
-  const messages = ref([
-    { id: 1, username: 'system', message: 'Welcome to Phanes Editor Chat.', time: '09:28:01' },
-    { id: 2, username: 'guest123', message: '안녕하세요! 이 부분 어떻게 해결해야 할까요?', time: '09:28:15' },
-    { id: 3, username: 'jamjari1', message: '아, 그 문제는 제가 한번 볼게요.', time: '09:28:22' },
-    { id: 4, username: 'master_dev', message: '잠시만요, 제가 수정해봤습니다.', time: '09:28:40' },
-    { id: 5, username: 'master_dev', message: '...', time: '09:28:40' }
-  ]);
-
-  // 새 메시지 입력을 위한 ref
-  const newMessage = ref('');
-
-  // DOM 요소 참조를 위한 ref
-  const messageWindowRef = ref<HTMLElement | null>(null);
-  const inputRef = ref<HTMLInputElement | null>(null);
-
-  // --- 사용자 색상 배정 ---
-
-  const userColors = ['#00FF00', '#FFFF00', '#00FFFF', '#FF00FF', '#FFA500', '#00BFFF'];
-  const userColorMap = new Map<string, string>();
-
-  function getUserColor(username: string): string {
-    if (username === 'system') return '#FF5555'; // 시스템 메시지는 빨간색
-    if (!userColorMap.has(username)) {
-      const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const color = userColors[hash % userColors.length];
-      userColorMap.set(username, color);
-    }
-    return userColorMap.get(username)!;
-  }
-
-  // --- 메시지 전송 및 UI 처리 ---
-
-  // 메시지 전송 함수
-  async function sendMessage() {
-
-    if (newMessage.value.trim() === '') return;
-
-    const now = new Date();
-    const newMsg = {
-      id: messages.value.length + 1,
-      username: currentUser.value,
-      message: newMessage.value,
-      time: now.toTimeString().split(' ')[0],
-    };
-
-    const chats = {
-      projectId: projectId,
-      message: newMessage.value // 이거만 잘 설정하면 됨
-    }
-
-    // messages.value.push(newMsg);
-    newMessage.value = ''; // 입력창 비우기
-
-
-    console.log(chats.message + "채팅 메시지 테스트");
-    const data = await api.chatCreate(chats);
-
-    if (data) {
-      // 데이터 잘 받아옴 굳
-    }
-
-    console.log(newMessage.value + "작성한 메시지");
-    socket.value.send(`/app/chat/${projectId}`, {}, JSON.stringify(newMsg)); // 여기도 id 수정해야 함
-
-    // 새 메시지가 추가된 후, 스크롤을 맨 아래로 이동
-    nextTick(() => {
-      const messageWindow = messageWindowRef.value;
-      if (messageWindow) {
-        messageWindow.scrollTop = messageWindow.scrollHeight;
-      }
-    });
-  }
-
-  // 입력창 포커스를 위한 함수
-  function focusInput() {
-    inputRef.value?.focus();
-  }
-
-  // 컴포넌트 마운트 시 입력창에 자동 포커스
-  onMounted(() => {
-    focusInput();
-    connectWebSocket();
+const subscribe = () => { // 프로젝트 id 등록시키기
+  socket.value.subscribe(`/topic/chat/${projectId}`, msg => {
+    const recevidData = msg.body;
+    messageList.value.push(JSON.parse(recevidData));
+    console.log(messageList.value[0]); // <-- 전달 받은 데이터
+    console.log(messageList.value.length);
   });
+}
+
+const connectWebSocket = () => {
+  const ws = new WebSocket(Ws.WS_URL);
+  const client = Stomp.over(ws);
+  socket.value = client;
+
+  client.connect(
+    {},
+    frame => {
+      console.log("WebSocket 연결 성공", frame);
+      subscribe(); // 연결 성공 후 구독 시작
+    },
+    err => {
+      console.error("WebSocket 연결 실패", err);
+    }
+  );
+}
+
+// --- 상태 관리 ---
+
+// 현재 사용자의 닉네임 (나중에 로그인 정보로 대체)
+const currentUser = ref('jamjari1');
+
+// 새 메시지 입력을 위한 ref
+const newMessage = ref('');
+
+// DOM 요소 참조를 위한 ref
+const messageWindowRef = ref(null);
+const inputRef = ref(null);
+
+// --- 사용자 색상 배정 ---
+
+const userColors = ['#00FF00', '#FFFF00', '#00FFFF', '#FF00FF', '#FFA500', '#00BFFF'];
+const userColorMap = new Map();
+
+function getUserColor(username) {
+  if (username === 'system') return '#FF5555'; // 시스템 메시지는 빨간색
+  if (!userColorMap.has(username)) {
+    const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const color = userColors[hash % userColors.length];
+    userColorMap.set(username, color);
+  }
+  return userColorMap.get(username);
+}
+
+// --- 메시지 전송 및 UI 처리 ---
+
+async function sendMessage() {
+
+  if (newMessage.value.trim() === '') return;
+
+  const now = new Date();
+  const newMsg = {
+    id: messageList.value.length + 1,
+    username: currentUser.value,
+    message: newMessage.value,
+    time: now.toTimeString().split(' ')[0],
+  };
+
+  const chats = {
+    projectId: projectId,
+    message: newMessage.value
+  }
+
+  newMessage.value = ''; // 입력창 비우기
+
+  console.log(chats.message + "채팅 메시지 테스트");
+  const data = await api.chatCreate(chats);
+
+  if (data) {
+    // 데이터 잘 받아옴 굳
+  }
+
+  socket.value.send(`/app/chat/${projectId}`, {}, JSON.stringify(newMsg));
+
+  nextTick(() => {
+    const messageWindow = messageWindowRef.value;
+    if (messageWindow) {
+      messageWindow.scrollTop = messageWindow.scrollHeight;
+    }
+  });
+}
+
+function focusInput() {
+  inputRef.value?.focus();
+}
+
+onMounted(() => {
+  focusInput();
+  connectWebSocket();
+});
 </script>
 
 <template>
@@ -134,7 +125,7 @@
         === Phanes Editor Command-Line Chat ===
       </div>
       <ul>
-        <li v-for="msg in chatList" :key="msg.id" class="message-line">
+        <li v-for="msg in chatList" :key="msg.idx" class="message-line">
           <span class="timestamp">[{{ msg.sentAt }}]</span>
           <span class="message-user" :style="{ color: getUserColor(msg.username) }">&lt;{{ msg.username }}&gt;</span>
           <span class="message-text">{{ msg.message }}</span>
@@ -149,7 +140,7 @@
     <div class="input-area">
       <span class="prompt">&gt;</span>
       <input type="text" v-model="newMessage" @keydown.enter="sendMessage" class="chat-input" ref="inputRef"
-        autocomplete="off" />
+             autocomplete="off" />
     </div>
   </div>
 </template>
