@@ -9,7 +9,7 @@ const userStore = useUserStore();
 
 onMounted(async () => {
   try {
-    const res = await userApi.userMypage(); // ✅ 쿠키로 유저 정보 가져오기
+    const res = await userApi.userMyPage(); // ✅ 쿠키로 유저 정보 가져오기
     if (res) {
       userStore.login(res);
       router.push("/");
