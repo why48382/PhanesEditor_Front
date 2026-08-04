@@ -45,31 +45,42 @@
       </Transition>
 
       <Transition name="slide-fade">
-        <div v-if="steps.showInvite" class="form-group">
-          <label for="project-invite">동료 초대하기 (선택 사항)</label>
-          <div class="invite-input-wrapper">
-            <input
-              type="text"
-              id="project-invite"
-              v-model.trim="invitee"
-              @keydown.enter.prevent="addInvitee"
-              placeholder="초대할 사용자 번호(숫자)"
-              ref="inviteInputRef"
-            />
-            <button @click="addInvitee" class="add-btn">추가</button>
-          </div>
+          <div v-if="steps.showInvite" class="form-group">
+              <label for="project-invite">동료 초대하기 (선택 사항)</label>
+              <div class="invite-input-wrapper">
+                  <input
+                          type="text"
+                          id="project-invite"
+                          v-model.trim="searchQuery"
+                          @keydown.enter.prevent="searchUsers"
+                          placeholder="닉네임으로 검색"
+                          ref="inviteInputRef"
+                  />
+                  <button @click="searchUsers" class="add-btn">검색</button>
+              </div>
 
-          <div class="invitee-list" v-if="project.memberIdx.length > 0">
-      <span
-        v-for="(idx, i) in project.memberIdx"
-        :key="idx"
-        class="invitee-tag"
-      >
-        {{ idx }}
-        <button @click="removeInvitee(i)" class="remove-tag-btn">×</button>
-      </span>
+              <div class="search-result-list" v-if="searchResults.length > 0">
+                  <div
+                          v-for="user in searchResults"
+                          :key="user.idx"
+                          class="search-result-item"
+                          @click="addMember(user)"
+                  >
+                      {{ user.nickname }}
+                  </div>
+              </div>
+
+              <div class="invitee-list" v-if="selectedMembers.length > 0">
+    <span
+            v-for="(member, i) in selectedMembers"
+            :key="member.idx"
+            class="invitee-tag"
+    >
+      {{ member.nickname }}
+      <button @click="removeInvitee(i)" class="remove-tag-btn">×</button>
+    </span>
+              </div>
           </div>
-        </div>
       </Transition>
 
       <Transition name="slide-fade">
@@ -83,14 +94,19 @@
 
 <script setup>
 import { ref, reactive, computed, nextTick } from 'vue';
-import api from '@/api/project/project_index'
 import { useRouter } from 'vue-router'
+import api from '@/api/project/project_index'
+import userApi from '@/api/user/user_index'
 
 const router = useRouter();
 const nameInputRef = ref(null);
 const descriptionInputRef = ref(null);
 const languageSelectRef = ref(null);
 const inviteInputRef = ref(null);
+
+const searchQuery = ref('');
+const searchResults = ref([]);
+const selectedMembers = ref([]);
 
 const steps = reactive({
   showDescription: false,
@@ -146,32 +162,32 @@ function handleEnterKey(currentStep, event = null) {
   }
 }
 
-const invitee = ref('');
+async function searchUsers() {
+    const keyword = searchQuery.value.trim();
+    if (!keyword) return;
+    try {
+        const data = await userApi.findUserNickname(keyword);
+        searchResults.value = data.results || [];
+    } catch (error) {
+        console.log(error);
+        searchResults.value = [];
+    }
+}
 
-function addInvitee() {
-  const raw = invitee.value.trim();
-
-  if (raw === '') return;
-
-  const idx = Number(raw);
-
-  if (!Number.isInteger(idx)) {
-    alert('유효한 회원 번호(숫자)를 입력해주세요.');
-    invitee.value = '';
-    return;
-  }
-
-  if (!project.memberIdx.includes(idx)) {
-    project.memberIdx.push(idx);
-  }
-
-  invitee.value = '';
+function addMember(user) {
+    if (!project.memberIdx.includes(user.idx)) {
+        project.memberIdx.push(user.idx);
+        selectedMembers.value.push({ idx: user.idx, nickname: user.nickname });
+    }
+    searchResults.value = [];
+    searchQuery.value = '';
 }
 
 function removeInvitee(index) {
-  project.memberIdx.splice(index, 1);
+    const removed = selectedMembers.value[index];
+    project.memberIdx = project.memberIdx.filter(idx => idx !== removed.idx);
+    selectedMembers.value.splice(index, 1);
 }
-
 async function createProject() {
   if (!isNameValid.value) {
     alert('프로젝트 이름을 2글자 이상 입력해주세요.');
@@ -438,5 +454,26 @@ select {
 .slide-fade-leave-to {
   transform: translateY(-20px);
   opacity: 0;
+}
+
+.search-result-list {
+    margin-top: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.search-result-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.search-result-item:hover {
+    background-color: #e0e7ff;
+}
+
+.search-result-item + .search-result-item {
+    border-top: 1px solid #e5e7eb;
 }
 </style>

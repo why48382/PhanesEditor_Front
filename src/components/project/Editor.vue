@@ -21,7 +21,6 @@ const projectId = route.params.id;
 const rootEl = ref(null);
 
 let filedIdx = "";
-
 let goldenLayout;                // GoldenLayout 인스턴스
 let monaco;                      // Monaco 네임스페이스
 let sourceEditor;                // 좌측 코드 에디터
@@ -76,11 +75,12 @@ function setFontSizeAll(fontSize = 13) {
 }
 
 // 기본 예시 코드/입력
-const DEFAULT_SOURCE = `public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello Judge0-style Layout!");
-    }
-}
+const DEFAULT_SOURCE = `// Phanes Editor에 오신 것을 환영합니다.
+//
+//  왼쪽 파일 목록에서 작업할 파일을 선택해보세요.
+//  선택한 파일의 코드가 이 화면에 나타납니다.
+//
+//  새 파일을 만들고 지금 바로 시작해보세요.
 `;
 const DEFAULT_STDIN = `3
 1 2
@@ -179,16 +179,16 @@ const unsubscribe = (fileIdx) => {
 }
 
 const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
-  console.log("subscribe 호출");
-  if (!fileIdx) return;
+    console.log("subscribe 호출");
+    if (!fileIdx) return;
 
-  if (!socket.value || !isSocketConnected) {
-    pendingFileIdx = fileIdx;
-    return;
-  }
+    if (!socket.value || !isSocketConnected) {
+        pendingFileIdx = fileIdx;
+        return;
+    }
 
-  console.log("subscribe 호출");
-  socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
+    console.log("subscribe 호출");
+    socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
         code.value = JSON.parse(msg.body);
         isProgrammaticEdit = true;
         if (code.value.type == "save") {
@@ -216,27 +216,27 @@ const sendMessage = (mesaage) => {
 }
 
 const connectWebSocket = () => {
-  const ws = new WebSocket(Ws.WS_URL);
-  const client = Stomp.over(ws);
-  socket.value = client;
+    const ws = new WebSocket(Ws.WS_URL);
+    const client = Stomp.over(ws);
+    socket.value = client;
 
-  client.connect(
-    {},
-    frame => {
-      isSocketConnected = true;
+    client.connect(
+        {},
+        frame => {
+            isSocketConnected = true;
 
-      if (pendingFileIdx) {
-        const fileIdx = pendingFileIdx;
-        pendingFileIdx = null;
-        subscribe(fileIdx);
-      }
-      console.log("WebSocket 연결 성공", frame);
-    },
-    err => {
-      isSocketConnected = false;
-      console.error("WebSocket 연결 실패", err);
-    }
-  );
+            if (pendingFileIdx) {
+                const fileIdx = pendingFileIdx;
+                pendingFileIdx = null;
+                subscribe(fileIdx);
+            }
+            console.log("WebSocket 연결 성공", frame);
+        },
+        err => {
+            isSocketConnected = false;
+            console.error("WebSocket 연결 실패", err);
+        }
+    );
 }
 
 // ====== 마운트 시 초기화 ======
@@ -368,6 +368,108 @@ onMounted(async () => {
         root.appendChild(treeWrap);
         container.element.appendChild(root);
 
+        // -- 새 파일 아이콘 버튼
+        const newFileBtn = document.createElement('button');
+        newFileBtn.type = 'button';
+        newFileBtn.className = 'file-tree__icon-btn';
+        newFileBtn.title = '새 파일/폴더';
+        newFileBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`;
+        newFileBtn.addEventListener('click', () => startInlineCreate());
+        searchWrap.appendChild(newFileBtn);
+
+        function startInlineCreate() {
+            if (treeWrap.querySelector('.file-tree__new-input')) return;
+
+            const row = document.createElement('div');
+            row.className = 'file-tree__row file-tree__row--new';
+            row.style.paddingLeft = '8px';
+
+            const ico = document.createElement('span');
+            ico.className = 'file-tree__icon';
+            ico.textContent = '📄';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'file-tree__new-input';
+            input.placeholder = '이름 입력 (확장자 있으면 파일, 없으면 폴더)';
+
+            row.appendChild(ico);
+            row.appendChild(input);
+            treeWrap.insertBefore(row, treeWrap.firstChild);
+            input.focus();
+
+            let removed = false;
+            const cleanup = () => {
+                if (removed) return;
+                removed = true;
+                row.remove();
+            };
+
+            input.addEventListener('keydown', async (e) => {
+                if (e.key === 'Enter') {
+                    const name = input.value.trim();
+                    if (!name) { cleanup(); return; }
+                    cleanup();
+
+                    const data = await fileApi.projectFile({ idx: projectId, name, contents: '', fileIdx: null });
+                    if (data && data.success) {
+                        fileList.splice(0);
+                        await fetchProjectFiles();
+                        render();
+                    } else {
+                        alert('생성에 실패했습니다.');
+                    }
+                } else if (e.key === 'Escape') {
+                    cleanup();
+                }
+            });
+
+            input.addEventListener('blur', cleanup);
+        }
+
+        async function handleDelete(idx) {
+            if (!window.confirm('삭제하시겠습니까?')) return;
+            const data = await fileApi.deleteFile(idx);
+            if (data && data.success) {
+                fileList.splice(0);
+                await fetchProjectFiles();
+                render();
+            } else {
+                alert('삭제 요청이 실패했습니다. (백엔드 미구현 상태면 정상입니다)');
+            }
+        }
+        let contextMenuEl = null;
+
+        function closeContextMenu() {
+            if (contextMenuEl) {
+                contextMenuEl.remove();
+                contextMenuEl = null;
+            }
+        }
+
+        function showContextMenu(x, y, items) {
+            closeContextMenu();
+            const menu = document.createElement('div');
+            menu.className = 'file-tree__context-menu';
+            menu.style.left = `${x + 2}px`;
+            menu.style.top = `${y + 2}px`;
+
+            items.forEach(({ label, onClick }) => {
+                const item = document.createElement('div');
+                item.className = 'file-tree__context-menu-item';
+                item.textContent = label;
+                item.addEventListener('click', () => {
+                    closeContextMenu();
+                    onClick();
+                });
+                menu.appendChild(item);
+            });
+
+            document.body.appendChild(menu);
+            contextMenuEl = menu;
+            setTimeout(() => document.addEventListener('click', closeContextMenu, { once: true }), 0);
+        }
+
         const treeData = fileList;
 
         const state = {
@@ -406,6 +508,14 @@ onMounted(async () => {
             row.appendChild(chevron);
             row.appendChild(ico);
             row.appendChild(label);
+
+            row.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showContextMenu(e.clientX, e.clientY, [
+                    { label: '삭제', onClick: () => handleDelete(idx) },
+                ]);
+            });
 
             // 클릭 동작
             row.addEventListener('click', async (e) => {
@@ -493,6 +603,13 @@ onMounted(async () => {
         expandTopLevelFolders(treeData);
         render();
 
+        root.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            showContextMenu(e.clientX, e.clientY, [
+                { label: '새 파일', onClick: () => startInlineCreate() },
+            ]);
+        });
+
         let searchTimer = null;
         search.addEventListener('input', () => {
             if (searchTimer) clearTimeout(searchTimer);
@@ -559,11 +676,11 @@ onMounted(async () => {
                 }
                 sendMessage(code.value);
                 console.log(datas);
-                    await api.projectFile(datas);
-                } catch (e) {
-                    // console.error('[auto-save] error:', e);
-                }
+                await api.projectFile(datas);
+            } catch (e) {
+                // console.error('[auto-save] error:', e);
             }
+        }
     })
     // 5) 30초마다 자동 업로드
     // if (!uploadTimer) {
@@ -617,10 +734,12 @@ onMounted(async () => {
 .file-tree__search {
     padding: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
 }
 
 .file-tree__search input[type="text"] {
-    width: 100%;
+    flex: 1;
     height: 28px;
     padding: 4px 8px;
     background: rgba(255, 255, 255, 0.06);
@@ -628,6 +747,7 @@ onMounted(async () => {
     color: #eee;
     border-radius: 4px;
 }
+
 
 .file-tree__wrap {
     padding: 6px 0;
@@ -668,5 +788,56 @@ onMounted(async () => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+</style>
+
+<style>
+
+.file-tree__icon-btn {
+    margin-left: 6px;
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.file-tree__icon-btn:hover {
+    color: #fff;
+}
+
+.file-tree__new-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(90, 160, 255, 0.5);
+    color: #eee;
+    padding: 2px 6px;
+    border-radius: 3px;
+    outline: none;
+}
+
+.file-tree__context-menu {
+    position: fixed;
+    background: #3c3c3c;
+    border: 1px solid #6a6a6a;
+    border-radius: 4px;
+    padding: 4px 0;
+    z-index: 999999;
+    min-width: 140px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    color: white;
+}
+
+.file-tree__context-menu-item {
+    padding: 6px 12px;
+    color: #eee;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.file-tree__context-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 </style>

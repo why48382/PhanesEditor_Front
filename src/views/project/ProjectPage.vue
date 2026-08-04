@@ -1,13 +1,11 @@
 <script setup>
 import SideBar from "@/components/SideBar.vue";
 import Editor from "@/components/project/Editor.vue";
-import EdirotFrame from "@/components/project/EdirotFrame.vue";
-import DosChat from "@/components/project/DosChat.vue";
-import TerminalWindows from "@/components/project/TerminalWindows.vue";
+import EditorFrame from "@/components/project/EditorFrame.vue";
 </script>
 
 <template>
-  <EdirotFrame />
+  <EditorFrame />
 
   <div class="layout">
     <SideBar />

@@ -2,7 +2,7 @@ import api from "@/plugins/axiosinterceptor";
 
 const projectFile = async (req) => {
     let data = {};
-    let url = '/file/register'; // 임시로 레지스터로 받게 하기
+    let url = '/file/register';
 
     await api.post(url, req)
         .then((res) => {
@@ -17,9 +17,6 @@ const projectFile = async (req) => {
 
 
 async function fetchProjectTree(projectId) {
-    // [백엔드 연동] API가 있으면 여기에 연결하세요.
-    // 예: return await api.getProjectTree({ projectId });
-    // 여기서는 스크린샷과 유사한 더미 데이터로 보여줄게요.
     return [
         { type: 'folder', name: '.gradle', children: [] },
         { type: 'folder', name: '.idea', children: [] },
@@ -105,4 +102,15 @@ async function openFile(fileIdx) {
     return data;
 }
 
-export default { projectFile, fetchProjectTree, openFile }
+const deleteFile = async (fileIdx) => {
+    let data = {};
+    let url = `/file/${fileIdx}`;
+
+    await api.delete(url)
+        .then((res) => { data = res.data; })
+        .catch((error) => { data = error.data; });
+
+    return data;
+}
+
+export default { projectFile, fetchProjectTree, openFile, deleteFile }
