@@ -1,3 +1,34 @@
+<script setup>
+import SearchDetailButton from '@/components/SearchDetailButton.vue'
+import sidebar from "@/components/SideBar.vue";
+import { computed } from "vue";
+import { useProjectStore } from "@/stores/useProjectStore";
+import projectApi from "@/api/project/project_index";
+
+const projectStore = useProjectStore();
+
+// 서버 호출
+const projectSearch = async () => {
+    const data = await projectApi.projectSearch({
+        name: projectStore.condition.name,   // 검색어
+        email: projectStore.condition.email,
+        language: projectStore.condition.language,
+        page: projectStore.condition.page,
+        size: projectStore.condition.size
+    });
+
+    if (data && data.success) {
+        projectStore.setResults(data.results.content, data.totalElements);
+    } else {
+        projectStore.setResults([], 0);
+    }
+};
+
+// 화면은 항상 store만 바라봄
+const filteredProjects = computed(() => projectStore.searchResults);
+
+</script>
+
 <template>
   <div class="page-container">
     <sidebar></sidebar>
@@ -44,37 +75,6 @@
     </main>
   </div>
 </template>
-
-<script setup>
-import SearchDetailButton from '@/components/SearchDetailButton.vue'
-import sidebar from "@/components/SideBar.vue";
-import { computed } from "vue";
-import { useProjectStore } from "@/stores/useProjectStore";
-import projectApi from "@/api/project/project_index";
-
-const projectStore = useProjectStore();
-
-// 서버 호출
-const projectSearch = async () => {
-  const data = await projectApi.projectSearch({
-    name: projectStore.condition.name,   // 검색어
-    email: projectStore.condition.email,
-    language: projectStore.condition.language,
-    page: projectStore.condition.page,
-    size: projectStore.condition.size
-  });
-
-  if (data && data.success) {
-    projectStore.setResults(data.results.content, data.totalElements);
-  } else {
-    projectStore.setResults([], 0);
-  }
-};
-
-// 화면은 항상 store만 바라봄
-const filteredProjects = computed(() => projectStore.searchResults);
-
-</script>
 
 <style scoped>
 /* ★★★★★ 여기가 핵심: 전체 테마 및 버튼 위치 수정 ★★★★★ */
