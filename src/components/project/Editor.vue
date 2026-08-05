@@ -38,9 +38,9 @@ let uploadTimer = null;
 let fullText = '';
 
 const datas = {
-    name: '/JAVA/hello.java',
+    name: 'untitled',
     contents: '',
-    idx: 1,
+    idx: projectId,
     fileIdx: ''
 };
 
@@ -97,12 +97,40 @@ const onResize = () => {
     goldenLayout?.updateSize();
 };
 
+// ====== Ctrl+S 저장 핸들러 (이름 있는 함수로 분리 - remove 가능하게) ======
+async function onKeydownSave(event) {
+    if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+
+        if (!datas.fileIdx) {
+            return;
+        }
+
+        try {
+            datas.contents = sourceEditor?.getValue() ?? '';
+            code.value = {
+                senderId: userIdx,
+                text: datas.contents,
+                type: "save"
+            }
+            sendMessage(code.value);
+            await api.projectFile(datas);
+        } catch (e) {
+            // console.error('[auto-save] error:', e);
+        }
+    }
+}
+
 onBeforeUnmount(() => {
     if (uploadTimer) {
         clearInterval(uploadTimer);
         uploadTimer = null;
     }
     window.removeEventListener('resize', onResize);
+    document.removeEventListener('keydown', onKeydownSave);
+
+    // 웹소켓 연결 해제
+    socket.value?.disconnect();
 
     // 🔑 Monaco 모델 정리
     monaco?.editor.getModels().forEach(model => model.dispose());
@@ -195,7 +223,7 @@ const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
     socket.value.subscribe(`/topic/editor/${fileIdx}`, msg => {
         code.value = JSON.parse(msg.body);
         isProgrammaticEdit = true;
-        if (code.value.type == "save") {
+        if (code.value.type === "save") {
             sourceEditor.setValue(code.value.text);
         } else if (userIdx != code.value.senderId) {
             sourceEditor.executeEdits("remote-edit", [
@@ -409,10 +437,18 @@ onMounted(async () => {
                 row.remove();
             };
 
+            const FILE_NAME_REGEX = /^[a-zA-Z0-9._-]+$/;
+
             input.addEventListener('keydown', async (e) => {
                 if (e.key === 'Enter') {
                     const name = input.value.trim();
                     if (!name) { cleanup(); return; }
+
+                    if (!FILE_NAME_REGEX.test(name)) {
+                        alert('파일 이름에는 영문, 숫자, ., _, - 만 사용할 수 있습니다. (/, 공백, 특수문자 불가)');
+                        return;
+                    }
+
                     cleanup();
 
                     const data = await fileApi.projectFile({ idx: projectId, name, contents: '', fileIdx: null });
@@ -665,27 +701,9 @@ onMounted(async () => {
         }
     });
 
-    // 5) ctrl + s 누르면
-    document.addEventListener('keydown', async (event) => {
-        if (event.ctrlKey && event.key == 's') {
-            event.preventDefault();
-            try {
-                console.log(datas.name + "파일 이름 테스트");
-                datas.contents = sourceEditor?.getValue() ?? '';
-                code.value = {
-                    senderId: userIdx,
-                    text: datas.contents,
-                    // range: change.range,
-                    type: "save"
-                }
-                sendMessage(code.value);
-                console.log(datas);
-                await api.projectFile(datas);
-            } catch (e) {
-                // console.error('[auto-save] error:', e);
-            }
-        }
-    })
+    // 5) ctrl + s 누르면 (이름 있는 함수로 등록 - unmount 시 제거 가능)
+    document.addEventListener('keydown', onKeydownSave);
+
     // 5) 30초마다 자동 업로드
     // if (!uploadTimer) {
     //     uploadTimer = setInterval(async () => {
