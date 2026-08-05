@@ -58,22 +58,23 @@ onMounted(() => {
 
             <div class="sidebar-list-section">
                 <div class="section-container">
-                    <h3>내 프로젝트</h3>
+                    <h3 class="project-head">내 프로젝트</h3>
                     <div class="scroll-box">
-                        <ul class="project-list">
-                            <li v-for="project in projectList.filter(p => p.isOwner)" :key="project.projectId">
-                                <router-link :to="{ name: 'editor', params: { id: project.projectId } }">
+                        <ul class="project-list" v-if="projectList.filter(p => p.owner).length > 0">
+                            <li v-for="project in projectList.filter(p => p.owner)" :key="project.idx">
+                                <router-link :to="{ name: 'editor', params: { id: project.idx } }">
                                     {{ project.projectName }}
                                 </router-link>
                             </li>
                         </ul>
+                        <p v-else class="empty-message">새로운 프로젝트를 만들고 시작해보세요!</p>
                     </div>
 
                     <div class="section-container">
-                        <h3>참여 프로젝트</h3>
+                        <h3 class="project-head">참여 프로젝트</h3>
                         <div class="scroll-box">
                             <ul class="project-list">
-                                <li v-for="project in projectList" :key="project.idx">
+                                <li v-for="project in projectList.filter(p => !p.owner)" :key="project.idx">
                                     <router-link :to="{ name: 'editor', params: { id: project.idx } }">
                                         {{ project.projectName }}
                                     </router-link>
@@ -109,8 +110,6 @@ onMounted(() => {
 .sidebar-top {
     /* 버튼 전용 상단 영역 */
     border-bottom: 1px solid #eee;
-    min-height: 40px;
-    display: flex;
     align-items: center;
     justify-content: flex-start;
 
@@ -226,5 +225,15 @@ onMounted(() => {
 
 .sidebar-content p {
     color: #555;
+}
+
+.empty-message {
+    color: #888;
+    font-size: 13px;
+    padding: 8px 0;
+}
+
+.project-head {
+    margin: 0;
 }
 </style>
