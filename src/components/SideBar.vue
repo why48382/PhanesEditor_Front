@@ -60,7 +60,7 @@ onMounted(() => {
                 <div class="section-container">
                     <h3>내 프로젝트</h3>
                     <div class="scroll-box">
-                        <ul>
+                        <ul class="project-list">
                             <li v-for="project in projectList.filter(p => p.isOwner)" :key="project.projectId">
                                 <router-link :to="{ name: 'editor', params: { id: project.projectId } }">
                                     {{ project.projectName }}
@@ -72,7 +72,7 @@ onMounted(() => {
                     <div class="section-container">
                         <h3>참여 프로젝트</h3>
                         <div class="scroll-box">
-                            <ul>
+                            <ul class="project-list">
                                 <li v-for="project in projectList" :key="project.idx">
                                     <router-link :to="{ name: 'editor', params: { id: project.idx } }">
                                         {{ project.projectName }}
@@ -96,9 +96,8 @@ onMounted(() => {
   flex-shrink: 0;
   background-color: #ffffff;
   border-right: 1px solid #e5e5e5;
-  padding: 20px;
-  padding-top: 60px;
-  transition: margin-left 0.3s ease-in-out;
+    padding: 60px 20px 20px;
+    transition: margin-left 0.3s ease-in-out;
   margin-left: 0;
 
   height: 100vh;           /* 화면 높이 꽉 채우기 */
@@ -155,7 +154,7 @@ onMounted(() => {
 
 /* 사이드바가 열렸을 때 햄버거 버튼의 위치 */
 .hamburger-btn.open {
-    left: 255px;
+    left: 235px;
     /* 사이드바 너비(280px) + 여백(15px) */
 }
 
@@ -214,7 +213,9 @@ onMounted(() => {
     /* 우측 여백 (스크롤바 안 가리게) */
 }
 
-
+.project-list {
+    padding: 0 0 0 22px;
+}
 
 .sidebar-content h3 {
     color: #0056b3;

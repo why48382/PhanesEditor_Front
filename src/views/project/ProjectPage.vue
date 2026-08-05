@@ -1,11 +1,9 @@
 <script setup>
 import SideBar from "@/components/SideBar.vue";
 import Editor from "@/components/project/Editor.vue";
-import EditorFrame from "@/components/project/EditorFrame.vue";
 </script>
 
 <template>
-  <EditorFrame />
 
   <div class="layout">
     <SideBar />

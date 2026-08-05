@@ -11,6 +11,10 @@ import projectApi from '@/api/project/project_index'
 import api from '@/api/file/file_index';
 import Stomp from 'stompjs';
 import Ws from '@/websocket/websocket.js'
+import MemberPanel from '@/components/project/MemberPanel.vue';
+import EditorFrame from "@/components/project/EditorFrame.vue";
+
+const showMemberPanel = ref(false);
 
 let isProgrammaticEdit = false;
 
@@ -704,9 +708,17 @@ onMounted(async () => {
 
 <template>
     <nav class="navbar">
-        <EdirotFrame />
+        <EditorFrame @toggle-members="showMemberPanel = !showMemberPanel" />
     </nav>
     <div ref="rootEl" class="gl-root"></div>
+
+    <MemberPanel
+            v-if="showMemberPanel"
+            :project-id="projectId"
+            :members="memberList"
+            :my-idx="userIdx"
+            @close="showMemberPanel = false"
+    />
 </template>
 
 <style scoped>
