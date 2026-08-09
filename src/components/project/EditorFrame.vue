@@ -1,4 +1,9 @@
 <script setup>
+    import { useRouter } from 'vue-router';
+
+    const router = useRouter();
+    const goHome = () => router.push('/');
+
     defineEmits(['toggle-members']);
 </script>
 
@@ -7,10 +12,11 @@
     <nav class="navbar">
         <div class="navbar-left">
             <!-- 비어있지만 필요한 부분임 -->
+            <button class="home-btn" @click="goHome">Phanes Editor</button>
         </div>
 
         <div class="navbar-right">
-            <button class="run-button">Run Code</button>
+<!--            <button class="run-button">Run Code</button>-->
             <button class="member-button" @click="$emit('toggle-members')">멤버 관리</button>
             <!-- <svg class="settings-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path
@@ -129,5 +135,11 @@ body {
 
 .member-button:hover {
     background-color: #e9ecef;
+}
+
+.home-btn {
+    margin-left: 47px;
+    border: 0;
+    font-size: 14px;
 }
 </style>
