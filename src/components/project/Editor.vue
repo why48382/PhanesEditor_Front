@@ -143,22 +143,35 @@ let memberList = reactive([]);
 let chatList = reactive([]);
 let userIdx = '';
 
+// 이 함수는 "현재 상태를 통째로 다시 불러오는" 용도라서, push 하기 전에
+// 기존 배열을 항상 비워야 함. 안 그러면 여러 번 호출될 때마다(예: 웹소켓 신호)
+// 파일/멤버/채팅이 매번 뒤에 또 붙어서 중복으로 쌓임
 const fetchProjectFiles = async () => {
     const data = await projectApi.fetchProjectById(route.params.id);
-    if (data && data.success) {
-        if (data.results) {
-            userIdx = data.results.userIdx;
-            const projectFileList = data.results.projectFile || [];
-            const projectMemberList = data.results.projectMember || [];
-            const projectChatList = data.results.projectChat || [];
-            if (projectFileList.length) fileList.push(...projectFileList);
-            if (projectMemberList.length) memberList.push(...projectMemberList);
-            if (projectChatList.length) chatList.push(...projectChatList);
-        }
+    if (data && data.success && data.results) {
+        userIdx = data.results.userIdx;
+        const projectFileList = data.results.projectFile || [];
+        const projectMemberList = data.results.projectMember || [];
+        const projectChatList = data.results.projectChat || [];
+
+        fileList.splice(0, fileList.length, ...projectFileList);
+        memberList.splice(0, memberList.length, ...projectMemberList);
+        chatList.splice(0, chatList.length, ...projectChatList);
     } else {
         fileList.splice(0);
         memberList.splice(0);
+        chatList.splice(0);
     }
+};
+
+// fileTree 컴포넌트 팩토리 안의 render()를 바깥(웹소켓 콜백 등)에서도 호출할 수 있도록 참조를 보관
+let renderFileTree = null;
+
+// 파일 생성/삭제 신호를 받았을 때 트리를 다시 불러와 그리는 공용 함수
+// fetchProjectFiles()가 이제 스스로 배열을 비우고 채우므로 여기서 따로 splice 할 필요 없음
+const refreshFileTree = async () => {
+    await fetchProjectFiles();
+    renderFileTree?.();
 };
 
 // ====== 에디터에 파일 열기(모델 스위칭) ======
@@ -225,7 +238,7 @@ const subscribe = (fileIdx) => { // 프로젝트 id 등록시키기
         isProgrammaticEdit = true;
         if (code.value.type === "save") {
             sourceEditor.setValue(code.value.text);
-        } else if (userIdx != code.value.senderId) {
+        } else if (userIdx !== code.value.senderId) {
             sourceEditor.executeEdits("remote-edit", [
                 {
                     range: new monaco.Range(
@@ -256,6 +269,12 @@ const connectWebSocket = () => {
         {},
         frame => {
             isSocketConnected = true;
+
+            // 프로젝트 단위 파일 트리 변경 알림 구독
+            // (생성/삭제가 성공하면 서버가 이 토픽으로 신호를 브로드캐스트함)
+            socket.value.subscribe(`/topic/project/${projectId}/files`, () => {
+                refreshFileTree();
+            });
 
             if (pendingFileIdx) {
                 const fileIdx = pendingFileIdx;
@@ -437,7 +456,7 @@ onMounted(async () => {
                 row.remove();
             };
 
-            const FILE_NAME_REGEX = /^[a-zA-Z0-9._-]+$/;
+            const FILE_NAME_REGEX = /^[a-zA-Z0-9가-힣_.,]+$/;
 
             input.addEventListener('keydown', async (e) => {
                 if (e.key === 'Enter') {
@@ -445,20 +464,19 @@ onMounted(async () => {
                     if (!name) { cleanup(); return; }
 
                     if (!FILE_NAME_REGEX.test(name)) {
-                        alert('파일 이름에는 영문, 숫자, ., _, - 만 사용할 수 있습니다. (/, 공백, 특수문자 불가)');
+                        alert('파일 이름에는 한글, 영문, 숫자, _, ., , 만 사용할 수 있습니다. (공백, /, 그 외 특수문자 불가)');
                         return;
                     }
 
                     cleanup();
 
                     const data = await fileApi.projectFile({ idx: projectId, name, contents: '', fileIdx: null });
-                    if (data && data.success) {
-                        fileList.splice(0);
-                        await fetchProjectFiles();
-                        render();
-                    } else {
+                    if (!data || !data.success) {
                         alert('생성에 실패했습니다.');
                     }
+                    // 성공 시 여기서 직접 refreshFileTree()를 부르지 않음
+                    // 서버가 /topic/project/{id}/files로 보낸 신호를 나도 구독 중이라
+                    // 잠시 후 그 신호로 refreshFileTree()가 호출됨 (직접 호출 + echo 중복 방지)
                 } else if (e.key === 'Escape') {
                     cleanup();
                 }
@@ -470,13 +488,10 @@ onMounted(async () => {
         async function handleDelete(idx) {
             if (!window.confirm('삭제하시겠습니까?')) return;
             const data = await fileApi.deleteFile(idx);
-            if (data && data.success) {
-                fileList.splice(0);
-                await fetchProjectFiles();
-                render();
-            } else {
+            if (!data || !data.success) {
                 alert('삭제 요청이 실패했습니다. (백엔드 미구현 상태면 정상입니다)');
             }
+            // 생성과 동일한 이유로 여기서도 직접 refreshFileTree()를 부르지 않음
         }
         let contextMenuEl = null;
 
@@ -633,6 +648,8 @@ onMounted(async () => {
             treeWrap.innerHTML = '';
             treeWrap.appendChild(walk(treeData, 0));
         }
+        // 웹소켓 신호(refreshFileTree)에서도 이 render를 호출할 수 있도록 바깥 참조에 등록
+        renderFileTree = render;
 
         function expandTopLevelFolders(nodes) {
             for (const n of nodes) {
