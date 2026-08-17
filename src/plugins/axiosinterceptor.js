@@ -8,15 +8,10 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        console.log("요청 보내기 전 실행");
-        console.log("📤 요청 URL:", config.baseURL + config.url);
-        console.log("📤 요청 메서드:", config.method);
-        console.log("📤 요청 데이터:", config.data);
-        console.log("📤 withCredentials:", config.withCredentials); // ✅ 여기 추가
+        console.log("요청 URL:", config.baseURL + config.url);
         return config;
     },
     (error) => {
-        console.log("요청할 때 에러 처리");
         return Promise.reject(error);
     }
 );
@@ -28,6 +23,11 @@ api.interceptors.response.use(
     },
     (error) => {
         console.log("응답 받을 때 에러 처리");
+
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem('@PhanesEditor:store');
+        }
+
         return Promise.reject(error);
     }
 );
