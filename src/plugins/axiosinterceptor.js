@@ -26,6 +26,7 @@ api.interceptors.response.use(
 
         if (error.response && error.response.status === 401) {
             localStorage.removeItem('@PhanesEditor:store');
+            window.location.reload();
         }
 
         return Promise.reject(error);
