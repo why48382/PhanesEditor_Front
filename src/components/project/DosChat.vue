@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import Stomp from 'stompjs';
 import api from '@/api/chat/chat_index'
 import Ws from '@/websocket/websocket.js'
@@ -15,6 +15,8 @@ let projectId = window.location.pathname.split('/')[3];
 
 const socket = ref(null);
 
+let isSocketConnected = false;
+
 const messageList = ref([]); // 실시간으로 새로 들어오는 메시지
 
 const subscribe = () => { // 프로젝트 id 등록시키기
@@ -27,20 +29,22 @@ const subscribe = () => { // 프로젝트 id 등록시키기
 }
 
 const connectWebSocket = () => {
-  const ws = new WebSocket(Ws.WS_URL);
-  const client = Stomp.over(ws);
-  socket.value = client;
+    const ws = new WebSocket(Ws.WS_URL);
+    const client = Stomp.over(ws);
+    socket.value = client;
 
-  client.connect(
-    {},
-    frame => {
-      console.log("WebSocket 연결 성공", frame);
-      subscribe(); // 연결 성공 후 구독 시작
-    },
-    err => {
-      console.error("WebSocket 연결 실패", err);
-    }
-  );
+    client.connect(
+        {},
+        frame => {
+            console.log("WebSocket 연결 성공", frame);
+            isSocketConnected = true;   // 추가
+            subscribe();
+        },
+        err => {
+            isSocketConnected = false;  // 추가
+            console.error("WebSocket 연결 실패", err);
+        }
+    );
 }
 
 // --- 상태 관리 ---
@@ -74,20 +78,21 @@ function getUserColor(username) {
 
 async function sendMessage() {
 
-  if (newMessage.value.trim() === '') return;
+    if (newMessage.value.trim() === '') return;
+    if (!socket.value || !isSocketConnected) return;
 
-  const now = new Date();
-  const newMsg = {
-    id: messageList.value.length + 1,
-    username: currentUser.value,
-    message: newMessage.value,
-    time: now.toTimeString().split(' ')[0],
-  };
+    const now = new Date();
+    const newMsg = {
+        id: messageList.value.length + 1,
+        username: currentUser.value,
+        message: newMessage.value,
+        time: now.toTimeString().split(' ')[0],
+    };
 
-  const chats = {
-    projectId: projectId,
-    message: newMessage.value
-  }
+      const chats = {
+        projectId: projectId,
+        message: newMessage.value
+    }
 
   newMessage.value = ''; // 입력창 비우기
 
@@ -115,6 +120,10 @@ function focusInput() {
 onMounted(() => {
   focusInput();
   connectWebSocket();
+});
+
+onBeforeUnmount(() => {
+    socket.value?.disconnect();
 });
 </script>
 
