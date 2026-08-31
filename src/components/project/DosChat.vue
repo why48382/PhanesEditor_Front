@@ -28,9 +28,19 @@ const subscribe = () => { // 프로젝트 id 등록시키기
   });
 }
 
+const getCurrentTime = () => {
+    const now = new Date();
+
+    return now.toLocaleTimeString('ko-KR', {
+        hour12: false,
+    });
+};
+
 const connectWebSocket = () => {
     const ws = new WebSocket(Ws.WS_URL);
     const client = Stomp.over(ws);
+    client.heartbeat.outgoing = 10000;
+    client.heartbeat.incoming = 10000;
     socket.value = client;
 
     client.connect(
@@ -43,6 +53,7 @@ const connectWebSocket = () => {
         err => {
             isSocketConnected = false;  // 추가
             console.error("WebSocket 연결 실패", err);
+            console.error(`[${getCurrentTime()}] WebSocket 연결 오류 발생`, err);
         }
     );
 }

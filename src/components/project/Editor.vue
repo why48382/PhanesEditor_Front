@@ -263,6 +263,8 @@ const sendMessage = (mesaage) => {
 const connectWebSocket = () => {
     const ws = new WebSocket(Ws.WS_URL);
     const client = Stomp.over(ws);
+    client.heartbeat.outgoing = 10000;
+    client.heartbeat.incoming = 10000;
     socket.value = client;
 
     client.connect(
