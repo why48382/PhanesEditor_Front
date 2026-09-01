@@ -13,6 +13,8 @@ const router = createRouter({
     { path: "/auth/success", name: 'oauth2Success', component: () => import("@/views/OAuth2Success.vue") },
     { path: "/test", component: () => import("@/views/Test.vue") },
     { path: "/health", component: () => import("@/views/Health.vue") },
+    { path: "/error", name: "error", component: () => import('@/views/ErrorPage.vue') },
+    { path: '/:pathMatch(.*)*', redirect: { name: 'main' } }
   ],
 })
 
