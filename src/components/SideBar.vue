@@ -4,7 +4,6 @@ import projectApi from '@/api/project/project_index'
 
 const projectList = ref([])
 
-
 const isSidebarOpen = ref(false);
 
 const toggleSidebar = () => {

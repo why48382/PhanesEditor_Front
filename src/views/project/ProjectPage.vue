@@ -1,12 +1,15 @@
 <script setup>
-import SideBar from "@/components/SideBar.vue";
+import sideBar from "@/components/SideBar.vue";
 import Editor from "@/components/project/Editor.vue";
+import useUserStore from '@/stores/useUserStore'
+
+const userStore = useUserStore();
 </script>
 
 <template>
 
   <div class="layout">
-    <SideBar />
+      <sideBar v-if="userStore.loginCheck()"></sideBar>
     <div class="main">
       <Editor />
     </div>

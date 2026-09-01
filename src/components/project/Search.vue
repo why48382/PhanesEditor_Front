@@ -4,9 +4,11 @@ import sidebar from "@/components/SideBar.vue";
 import { computed } from "vue";
 import { useProjectStore } from "@/stores/useProjectStore";
 import projectApi from "@/api/project/project_index";
+import useUserStore from '@/stores/useUserStore'
 
 const projectStore = useProjectStore();
 
+const userStore = useUserStore();
 // 서버 호출
 const projectSearch = async () => {
     const data = await projectApi.projectSearch({
@@ -31,7 +33,7 @@ const filteredProjects = computed(() => projectStore.searchResults);
 
 <template>
   <div class="page-container">
-    <sidebar></sidebar>
+      <sidebar v-if="userStore.loginCheck()"></sidebar>
 
     <main class="main-content">
       <!-- 검색창 -->
